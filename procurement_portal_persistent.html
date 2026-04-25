@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procurement Portal — Parliament of Sierra Leone</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue-50:#E6F1FB;--blue-100:#B5D4F4;--blue-200:#85B7EB;--blue-400:#378ADD;
+  --blue-600:#185FA5;--blue-800:#0C447C;--blue-900:#042C53;
+  --teal-50:#E1F5EE;--teal-100:#9FE1CB;--teal-400:#1D9E75;--teal-600:#0F6E56;--teal-800:#085041;
+  --amber-50:#FAEEDA;--amber-100:#FAC775;--amber-200:#EF9F27;--amber-600:#854F0B;
+  --red-50:#FCEBEB;--red-100:#F7C1C1;--red-400:#E24B4A;--red-600:#A32D2D;
+  --purple-50:#EEEDFE;--purple-600:#534AB7;--purple-800:#3C3489;
+  --green-50:#EAF3DE;--green-600:#3B6D11;
+  --gray-50:#F5F5F3;--gray-100:#E8E8E4;--gray-200:#D3D1C7;--gray-400:#888780;
+  --gray-600:#5F5E5A;--gray-800:#3A3A37;--gray-900:#1E1E1C;
+  --bg:#FAFAF8;--bg-card:#FFFFFF;--bg-surface:#F2F2EF;
+  --text-primary:#1E1E1C;--text-secondary:#5F5E5A;--text-muted:#888780;
+  --border:rgba(0,0,0,0.1);--border-strong:rgba(0,0,0,0.18);
+  --radius:10px;--radius-lg:14px;
+  --shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.08),0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:0 8px 24px rgba(0,0,0,0.1),0 4px 8px rgba(0,0,0,0.06);
+}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;font-size:15px;line-height:1.6}
+
+/* ── LOADING ── */
+#screen-loading{min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:var(--blue-900)}
+.loading-logo{width:56px;height:56px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);border-radius:14px;display:flex;align-items:center;justify-content:center}
+.loading-logo svg{width:28px;height:28px;fill:none;stroke:white;stroke-width:2}
+.loading-text{font-size:14px;color:rgba(255,255,255,0.55)}
+.loading-spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,0.2);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── LOGIN ── */
+#screen-login{min-height:100vh;display:none;align-items:center;justify-content:center;background:linear-gradient(135deg,#042C53 0%,#185FA5 60%,#378ADD 100%);padding:2rem 1rem}
+.login-container{width:100%;max-width:420px}
+.login-header{text-align:center;margin-bottom:2rem}
+.login-emblem{width:64px;height:64px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;backdrop-filter:blur(8px)}
+.login-emblem svg{width:32px;height:32px;fill:none;stroke:white;stroke-width:1.8}
+.login-header h1{font-size:22px;font-weight:600;color:white;letter-spacing:-0.02em}
+.login-header p{font-size:13px;color:rgba(255,255,255,0.6);margin-top:4px}
+.login-card{background:white;border-radius:var(--radius-lg);padding:2rem;box-shadow:var(--shadow-lg)}
+.demo-box{background:var(--bg-surface);border-radius:var(--radius);padding:12px 14px;margin-bottom:1.5rem;border-left:3px solid var(--blue-400)}
+.demo-title{font-size:11px;font-weight:600;color:var(--blue-600);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.demo-box table{font-size:12px;color:var(--text-secondary);width:100%}
+.demo-box td{padding:2px 6px 2px 0}
+.demo-box td:first-child{font-family:'DM Mono',monospace;color:var(--blue-800);font-weight:500}
+.demo-box td:last-child{color:var(--text-secondary);text-align:right}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;letter-spacing:0.02em}
+.field input{width:100%;padding:10px 14px;font-size:14px;font-family:inherit;border:1px solid var(--border-strong);border-radius:var(--radius);background:white;color:var(--text-primary);outline:none;transition:border-color .15s,box-shadow .15s}
+.field input:focus{border-color:var(--blue-600);box-shadow:0 0 0 3px rgba(24,95,165,.12)}
+.login-error{font-size:12px;color:var(--red-600);margin-top:6px;min-height:16px}
+.btn-login{width:100%;padding:11px;background:var(--blue-600);color:white;border:none;border-radius:var(--radius);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s,transform .1s;margin-top:4px}
+.btn-login:hover{background:var(--blue-800)}
+.btn-login:active{transform:scale(0.99)}
+.login-footer{text-align:center;margin-top:1.25rem;font-size:12px;color:rgba(255,255,255,0.4)}
+
+/* ── APP ── */
+#screen-app{display:none;min-height:100vh}
+.topbar{position:sticky;top:0;z-index:50;background:var(--blue-900);border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:56px}
+.tb-left{display:flex;align-items:center;gap:12px}
+.tb-logo{width:34px;height:34px;background:var(--blue-600);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.tb-logo svg{width:18px;height:18px;fill:none;stroke:white;stroke-width:2}
+.tb-org-name{font-size:14px;font-weight:600;color:white;line-height:1.2}
+.tb-org-sub{font-size:11px;color:rgba(255,255,255,0.4)}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-avatar{width:32px;height:32px;border-radius:50%;background:var(--blue-600);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:white}
+.tb-user-name{font-size:13px;font-weight:500;color:white;line-height:1.2}
+.tb-user-role{font-size:11px;color:rgba(255,255,255,0.5)}
+.role-badge{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500}
+.rb-requester{background:var(--teal-50);color:var(--teal-600)}
+.rb-supervisor{background:var(--amber-50);color:var(--amber-600)}
+.rb-finance{background:var(--purple-50);color:var(--purple-600)}
+.rb-procurement{background:var(--blue-50);color:var(--blue-600)}
+.rb-director{background:var(--red-50);color:var(--red-600)}
+.btn-signout{padding:6px 14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius);color:rgba(255,255,255,0.7);font-size:12px;font-family:inherit;cursor:pointer;transition:background .15s}
+.btn-signout:hover{background:rgba(255,255,255,0.14);color:white}
+.sync-indicator{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,0.45)}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--teal-400)}
+.sync-dot.syncing{background:var(--amber-200);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+.tab-bar{background:white;border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;gap:0}
+.tab-btn{padding:14px 18px;font-size:13px;font-weight:500;font-family:inherit;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-muted);cursor:pointer;margin-bottom:-1px;transition:color .15s,border-color .15s}
+.tab-btn:hover{color:var(--text-primary)}
+.tab-btn.active{color:var(--blue-600);border-bottom-color:var(--blue-600)}
+.tab-badge{display:inline-block;background:var(--red-400);color:white;font-size:10px;padding:1px 5px;border-radius:10px;margin-left:5px;font-weight:600;line-height:1.4}
+
+.main{max-width:960px;margin:0 auto;padding:1.75rem 1.5rem}
+.view{display:none}
+.view.active{display:block}
+
+/* ADMIN PANEL */
+.admin-card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;box-shadow:var(--shadow);margin-bottom:1rem}
+.admin-card-header{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.admin-icon{width:36px;height:36px;background:var(--red-50);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.admin-icon svg{width:18px;height:18px;fill:none;stroke:var(--red-600);stroke-width:2}
+.admin-title{font-size:16px;font-weight:600;color:var(--text-primary)}
+.admin-sub{font-size:12px;color:var(--text-muted);margin-top:1px}
+.user-table{width:100%;border-collapse:collapse;font-size:13px}
+.user-table th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)}
+.user-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text-primary)}
+.user-table tr:last-child td{border-bottom:none}
+.user-table tr:hover td{background:var(--bg-surface)}
+.btn-del{padding:4px 10px;background:none;border:1px solid var(--red-100);color:var(--red-600);border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit}
+.btn-del:hover{background:var(--red-50)}
+.add-user-form{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+.au-field label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:500}
+.au-field input,.au-field select{width:100%;padding:8px 10px;font-size:13px;font-family:inherit;border:1px solid var(--border-strong);border-radius:var(--radius);background:white;color:var(--text-primary);outline:none}
+.au-field input:focus,.au-field select:focus{border-color:var(--blue-600);box-shadow:0 0 0 2px rgba(24,95,165,.1)}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}
+.metric-card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;box-shadow:var(--shadow)}
+.metric-label{font-size:12px;color:var(--text-muted);margin-bottom:4px}
+.metric-value{font-size:28px;font-weight:600;color:var(--text-primary);letter-spacing:-0.03em}
+.metric-card.m-pending .metric-value{color:var(--amber-600)}
+.metric-card.m-approved .metric-value{color:var(--teal-600)}
+.metric-card.m-complete .metric-value{color:var(--blue-600)}
+
+/* REQUEST LIST */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.section-title{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em}
+.req-list{display:flex;flex-direction:column;gap:8px}
+.req-card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .15s,box-shadow .15s;box-shadow:var(--shadow)}
+.req-card:hover{border-color:var(--blue-200);box-shadow:var(--shadow-md)}
+.req-card.actionable{border-left:3px solid var(--blue-600);padding-left:15px}
+.req-id{font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;margin-bottom:2px}
+.req-name{font-size:15px;font-weight:500;color:var(--text-primary)}
+.req-meta{font-size:12px;color:var(--text-secondary);margin-top:3px}
+.req-card-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.status-tag{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:500;white-space:nowrap}
+.st-draft{background:var(--gray-100);color:var(--gray-600)}
+.st-pending{background:var(--amber-50);color:var(--amber-600)}
+.st-approved{background:var(--teal-50);color:var(--teal-600)}
+.st-rejected{background:var(--red-50);color:var(--red-600)}
+.st-po{background:var(--purple-50);color:var(--purple-600)}
+.st-complete{background:var(--green-50);color:var(--green-600)}
+.empty-state{text-align:center;padding:3rem;color:var(--text-muted);font-size:14px}
+
+/* FORM */
+.form-card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;box-shadow:var(--shadow);margin-bottom:1rem}
+.form-card-header{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.form-card-icon{width:36px;height:36px;background:var(--blue-50);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.form-card-icon svg{width:18px;height:18px;fill:none;stroke:var(--blue-600);stroke-width:2}
+.form-card-title{font-size:16px;font-weight:600;color:var(--text-primary)}
+.form-card-sub{font-size:12px;color:var(--text-muted);margin-top:1px}
+.stage-chip{font-size:11px;padding:3px 9px;background:var(--blue-50);color:var(--blue-600);border-radius:20px;font-weight:500;margin-left:auto}
+.fsect{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;margin-top:1.25rem}
+.fsect:first-of-type{margin-top:0}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.cs2{grid-column:span 2}
+.fr{margin-bottom:0}
+.fr label{display:block;font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:5px}
+.fr input,.fr select,.fr textarea{width:100%;padding:9px 12px;font-size:13px;font-family:inherit;border:1px solid var(--border-strong);border-radius:var(--radius);background:white;color:var(--text-primary);outline:none;transition:border-color .15s,box-shadow .15s}
+.fr input:focus,.fr select:focus,.fr textarea:focus{border-color:var(--blue-600);box-shadow:0 0 0 3px rgba(24,95,165,.1)}
+.fr textarea{resize:vertical;min-height:72px}
+.rstar{color:var(--red-400)}
+.form-actions{display:flex;gap:10px;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);flex-wrap:wrap;align-items:center}
+.btn-submit{padding:10px 22px;background:var(--blue-600);color:white;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s}
+.btn-submit:hover{background:var(--blue-800)}
+.btn-save{padding:10px 18px;background:none;color:var(--text-secondary);border:1px solid var(--border-strong);border-radius:var(--radius);font-size:13px;font-family:inherit;cursor:pointer;transition:background .15s}
+.btn-save:hover{background:var(--bg-surface)}
+.form-error{font-size:12px;color:var(--red-600)}
+
+/* ACTIVITY */
+.activity-list{display:flex;flex-direction:column}
+.act-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+.act-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.act-dot.blue{background:var(--blue-400)}
+.act-dot.green{background:var(--teal-400)}
+.act-dot.amber{background:var(--amber-200)}
+.act-dot.red{background:var(--red-400)}
+.act-text{font-size:13px;color:var(--text-primary)}
+.act-req{font-family:'DM Mono',monospace;font-size:11px;color:var(--blue-600);background:var(--blue-50);padding:1px 6px;border-radius:4px;margin-right:6px}
+.act-time{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(4,44,83,0.45);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;backdrop-filter:blur(2px)}
+.modal-overlay.open{display:flex}
+.modal-panel{background:white;border-radius:var(--radius-lg);width:100%;max-width:640px;box-shadow:var(--shadow-lg);margin:auto}
+.modal-topbar{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+.modal-title{font-size:16px;font-weight:600;color:var(--text-primary)}
+.modal-id{font-size:12px;color:var(--text-muted);font-family:'DM Mono',monospace;margin-top:2px}
+.modal-close{width:32px;height:32px;border-radius:8px;border:none;background:var(--bg-surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);transition:background .15s}
+.modal-close:hover{background:var(--gray-200)}
+.modal-body{padding:1.5rem}
+.stage-progress{display:flex;gap:0;margin-bottom:1.5rem;overflow-x:auto;padding-bottom:4px}
+.stage-step{flex:1;min-width:0}
+.stage-step-inner{display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.stage-step-inner::before{content:'';position:absolute;top:12px;left:50%;width:100%;height:2px;background:var(--gray-200)}
+.stage-step:last-child .stage-step-inner::before{display:none}
+.stage-dot{width:24px;height:24px;border-radius:50%;border:2px solid var(--gray-200);background:white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--text-muted);position:relative;z-index:1;flex-shrink:0}
+.stage-dot.done{background:var(--teal-400);border-color:var(--teal-400);color:white}
+.stage-dot.active{background:var(--blue-600);border-color:var(--blue-600);color:white}
+.stage-label{font-size:10px;color:var(--text-muted);text-align:center;white-space:nowrap}
+.stage-label.done{color:var(--teal-600)}
+.stage-label.active{color:var(--blue-600);font-weight:600}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
+.detail-label{font-size:11px;color:var(--text-muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:0.04em}
+.detail-value{font-size:13px;color:var(--text-primary);font-weight:500}
+.detail-value.total{font-size:16px;color:var(--blue-800)}
+.jbox{background:var(--bg-surface);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;font-size:13px;color:var(--text-primary);border-left:3px solid var(--blue-200)}
+.jbox strong{font-weight:500;color:var(--text-muted);font-size:11px;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em}
+.modal-log-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;margin-top:1rem}
+.mli{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.mli-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.mli-dot.blue{background:var(--blue-400)}
+.mli-dot.green{background:var(--teal-400)}
+.mli-dot.red{background:var(--red-400)}
+.mli-text{font-size:13px;color:var(--text-primary)}
+.mli-who{font-weight:500}
+.mli-time{font-size:11px;color:var(--text-muted);margin-top:2px}
+.modal-actions{display:flex;gap:10px;padding:1.25rem 1.5rem;border-top:1px solid var(--border);flex-wrap:wrap;align-items:center}
+.btn-approve-act{padding:10px 20px;background:var(--teal-400);color:white;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s}
+.btn-approve-act:hover{background:var(--teal-600)}
+.btn-reject-act{padding:10px 18px;background:none;color:var(--red-600);border:1px solid var(--red-100);border-radius:var(--radius);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;transition:background .15s}
+.btn-reject-act:hover{background:var(--red-50)}
+.btn-po-act{padding:10px 20px;background:var(--purple-600);color:white;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s}
+.btn-po-act:hover{background:var(--purple-800)}
+.btn-close-act{padding:10px 18px;background:none;color:var(--text-secondary);border:1px solid var(--border-strong);border-radius:var(--radius);font-size:13px;font-family:inherit;cursor:pointer;margin-left:auto}
+.btn-close-act:hover{background:var(--bg-surface)}
+
+/* COMMENT MODAL */
+.comment-overlay{display:none;position:fixed;inset:0;background:rgba(4,44,83,0.5);z-index:300;align-items:center;justify-content:center;padding:1rem}
+.comment-overlay.open{display:flex}
+.comment-panel{background:white;border-radius:var(--radius-lg);padding:1.5rem;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
+.comment-title{font-size:16px;font-weight:600;margin-bottom:1rem}
+.comment-panel textarea{width:100%;padding:10px 12px;font-size:13px;font-family:inherit;border:1px solid var(--border-strong);border-radius:var(--radius);resize:vertical;min-height:80px;outline:none;color:var(--text-primary)}
+.comment-panel textarea:focus{border-color:var(--blue-600);box-shadow:0 0 0 3px rgba(24,95,165,.1)}
+.comment-actions{display:flex;gap:8px;margin-top:1rem}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--gray-900);color:white;padding:12px 18px;border-radius:var(--radius);font-size:13px;z-index:500;box-shadow:var(--shadow-lg);transform:translateY(80px);opacity:0;transition:transform .25s,opacity .25s;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--teal-600)}
+.toast.error{background:var(--red-600)}
+.toast.warn{background:var(--amber-600)}
+
+/* DATA INFO BANNER */
+.data-banner{background:var(--blue-50);border:1px solid var(--blue-100);border-radius:var(--radius);padding:10px 14px;margin-bottom:1rem;font-size:12px;color:var(--blue-800);display:flex;align-items:center;gap:8px}
+.data-banner svg{width:16px;height:16px;fill:none;stroke:var(--blue-600);stroke-width:2;flex-shrink:0}
+
+@media(max-width:640px){
+  .metrics{grid-template-columns:1fr 1fr}
+  .fg2,.fg3{grid-template-columns:1fr}
+  .cs2{grid-column:span 1}
+  .detail-grid{grid-template-columns:1fr 1fr}
+  .topbar{padding:0 1rem}
+  .main{padding:1rem}
+  .tb-org-sub,.sync-indicator{display:none}
+  .add-user-form{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="screen-loading">
+  <div class="loading-logo">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+  </div>
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Loading procurement portal...</div>
+</div>
+
+<!-- LOGIN -->
+<div id="screen-login">
+  <div class="login-container">
+    <div class="login-header">
+      <div class="login-emblem">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      </div>
+      <h1>Procurement Portal</h1>
+      <p>Parliament of Sierra Leone &mdash; Data saved across sessions</p>
+    </div>
+    <div class="login-card">
+      <div class="demo-box">
+        <div class="demo-title">Default login credentials</div>
+        <table>
+          <tr><td>requester</td><td>/</td><td>req123 &mdash; Submit requests</td></tr>
+          <tr><td>supervisor</td><td>/</td><td>sup123 &mdash; Stage 2 approval</td></tr>
+          <tr><td>finance</td><td>/</td><td>fin123 &mdash; Budget review</td></tr>
+          <tr><td>procurement</td><td>/</td><td>pro123 &mdash; Vendor &amp; PO</td></tr>
+          <tr><td>director</td><td>/</td><td>dir123 &mdash; Final approval</td></tr>
+          <tr><td>admin</td><td>/</td><td>admin123 &mdash; Manage users</td></tr>
+        </table>
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input id="login-user" type="text" placeholder="Enter your username" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="login-pass" type="password" placeholder="Enter your password">
+      </div>
+      <div class="login-error" id="login-error"></div>
+      <button class="btn-login" onclick="doLogin()">Sign in to portal</button>
+    </div>
+    <div class="login-footer">Parliament of Sierra Leone &mdash; Internal Use Only &mdash; Data persists locally</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="screen-app">
+  <div class="topbar">
+    <div class="tb-left">
+      <div class="tb-logo">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      </div>
+      <div>
+        <div class="tb-org-name">Procurement Portal</div>
+        <div class="tb-org-sub">Parliament of Sierra Leone</div>
+      </div>
+    </div>
+    <div class="tb-right">
+      <div class="sync-indicator" id="sync-indicator">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-label">Saved</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="tb-avatar" id="tb-avatar">AK</div>
+        <div>
+          <div class="tb-user-name" id="tb-name">Aisha Kamara</div>
+          <div class="tb-user-role" id="tb-role-txt">Requester</div>
+        </div>
+        <span class="role-badge" id="tb-role-badge">Requester</span>
+      </div>
+      <button class="btn-signout" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('requests',this)">All Requests</button>
+    <button class="tab-btn" onclick="switchTab('new',this)" id="tab-new-btn">New Request</button>
+    <button class="tab-btn" onclick="switchTab('activity',this)">Activity Log</button>
+    <button class="tab-btn" onclick="switchTab('admin',this)" id="tab-admin-btn" style="display:none">Admin</button>
+  </div>
+
+  <div class="main">
+
+    <!-- REQUESTS -->
+    <div class="view active" id="view-requests">
+      <div class="data-banner">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>Data is saved in this browser. To share across computers, use the <strong>Export / Import</strong> buttons below, or host this file on a shared server.</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+        <button class="btn-save" onclick="exportData()" style="font-size:12px;padding:7px 14px">&#8595; Export data</button>
+        <button class="btn-save" onclick="document.getElementById('import-file').click()" style="font-size:12px;padding:7px 14px">&#8593; Import data</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+        <button class="btn-save" onclick="resetToDefaults()" style="font-size:12px;padding:7px 14px;color:var(--red-600)">&#8635; Reset to defaults</button>
+      </div>
+      <div class="metrics">
+        <div class="metric-card"><div class="metric-label">Total requests</div><div class="metric-value" id="m-total">0</div></div>
+        <div class="metric-card m-pending"><div class="metric-label">Pending review</div><div class="metric-value" id="m-pending">0</div></div>
+        <div class="metric-card m-approved"><div class="metric-label">Approved</div><div class="metric-value" id="m-approved">0</div></div>
+        <div class="metric-card m-complete"><div class="metric-label">Completed</div><div class="metric-value" id="m-complete">0</div></div>
+      </div>
+      <div class="section-header">
+        <div class="section-title">Procurement requests</div>
+        <div style="font-size:12px;color:var(--text-muted)" id="last-saved-label"></div>
+      </div>
+      <div class="req-list" id="req-list"></div>
+    </div>
+
+    <!-- NEW REQUEST -->
+    <div class="view" id="view-new">
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-card-icon">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </div>
+          <div>
+            <div class="form-card-title">New procurement request</div>
+            <div class="form-card-sub">Complete all required fields marked with *</div>
+          </div>
+          <span class="stage-chip">Stage 1 &mdash; Request initiation</span>
+        </div>
+        <div class="fsect">Item information</div>
+        <div class="fg2">
+          <div class="fr cs2">
+            <label>Item / Service description <span class="rstar">*</span></label>
+            <input id="f-item" type="text" placeholder="e.g. Office printer cartridges, consultancy services...">
+          </div>
+          <div class="fr">
+            <label>Department <span class="rstar">*</span></label>
+            <select id="f-dept">
+              <option value="">Select department</option>
+              <option>Administration</option>
+              <option>Finance</option>
+              <option>ICT</option>
+              <option>Library and Research</option>
+              <option>Plenary</option>
+              <option>Public Relations</option>
+              <option>Transport</option>
+              <option>Data and Information Unit</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="fr">
+            <label>Supplier / Vendor (optional)</label>
+            <input id="f-supplier" type="text" placeholder="Supplier name or contact">
+          </div>
+        </div>
+        <div class="fsect">Quantity &amp; cost</div>
+        <div class="fg3">
+          <div class="fr">
+            <label>Quantity <span class="rstar">*</span></label>
+            <input id="f-qty" type="number" min="1" placeholder="0">
+          </div>
+          <div class="fr">
+            <label>Unit cost (SLL)</label>
+            <input id="f-cost" type="number" min="0" placeholder="0">
+          </div>
+          <div class="fr">
+            <label>Urgency level</label>
+            <select id="f-urgency"><option>Routine</option><option>Urgent</option><option>Emergency</option></select>
+          </div>
+        </div>
+        <div class="fsect">Details</div>
+        <div class="fg2">
+          <div class="fr">
+            <label>Required by date</label>
+            <input id="f-date" type="date">
+          </div>
+          <div class="fr">
+            <label>Budget line / Code (optional)</label>
+            <input id="f-budget" type="text" placeholder="e.g. ADM-2026-Q2">
+          </div>
+          <div class="fr cs2">
+            <label>Business justification <span class="rstar">*</span></label>
+            <textarea id="f-justification" placeholder="Explain why this procurement is needed, expected outcomes, and how it supports parliamentary operations..."></textarea>
+          </div>
+          <div class="fr cs2">
+            <label>Additional notes / Specifications (optional)</label>
+            <textarea id="f-notes" placeholder="Delivery requirements, technical specs, or other notes..."></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-submit" onclick="submitRequest()">Submit request</button>
+          <button class="btn-save" onclick="clearForm()">Clear form</button>
+          <div class="form-error" id="form-error"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div class="view" id="view-activity">
+      <div class="section-header"><div class="section-title">All activity &mdash; most recent first</div></div>
+      <div class="activity-list" id="activity-list"></div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="view" id="view-admin">
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div>
+            <div class="admin-title">User management</div>
+            <div class="admin-sub">Add, edit, or remove portal users. Changes save immediately.</div>
+          </div>
+        </div>
+        <table class="user-table">
+          <thead><tr><th>Username</th><th>Full name</th><th>Role</th><th>Initials</th><th></th></tr></thead>
+          <tbody id="user-table-body"></tbody>
+        </table>
+        <div class="add-user-form" id="add-user-form">
+          <div class="au-field">
+            <label>Username</label>
+            <input id="nu-user" type="text" placeholder="username">
+          </div>
+          <div class="au-field">
+            <label>Password</label>
+            <input id="nu-pass" type="text" placeholder="password">
+          </div>
+          <div class="au-field">
+            <label>Full name</label>
+            <input id="nu-name" type="text" placeholder="Full name">
+          </div>
+          <div class="au-field">
+            <label>Role</label>
+            <select id="nu-role">
+              <option value="requester">Requester</option>
+              <option value="supervisor">Supervisor</option>
+              <option value="finance">Finance Officer</option>
+              <option value="procurement">Procurement Officer</option>
+              <option value="director">Director</option>
+            </select>
+          </div>
+          <div class="au-field">
+            <label>&nbsp;</label>
+            <button class="btn-submit" onclick="addUser()" style="white-space:nowrap;width:100%">+ Add user</button>
+          </div>
+        </div>
+        <div class="form-error" id="admin-error" style="margin-top:8px"></div>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <div class="admin-icon" style="background:var(--red-50)">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          </div>
+          <div>
+            <div class="admin-title">Data management</div>
+            <div class="admin-sub">Export all data as JSON, import from a backup, or reset to defaults.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn-submit" onclick="exportData()">&#8595; Export all data</button>
+          <button class="btn-save" onclick="document.getElementById('import-file2').click()">&#8593; Import backup</button>
+          <input type="file" id="import-file2" accept=".json" style="display:none" onchange="importData(event)">
+          <button class="btn-save" onclick="resetToDefaults()" style="color:var(--red-600)">&#8635; Reset to factory defaults</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- REQUEST DETAIL MODAL -->
+<div class="modal-overlay" id="req-modal" onclick="handleOverlayClick(event,'req-modal')">
+  <div class="modal-panel">
+    <div class="modal-topbar">
+      <div>
+        <div class="modal-title" id="modal-title">Request detail</div>
+        <div class="modal-id" id="modal-id">PR-001</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<!-- COMMENT MODAL -->
+<div class="comment-overlay" id="comment-modal">
+  <div class="comment-panel">
+    <div class="comment-title" id="cmt-title">Approve request</div>
+    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px">Add a comment or reason (optional)</div>
+    <textarea id="cmt-text" placeholder="Enter your comment here..."></textarea>
+    <div class="comment-actions">
+      <button class="btn-approve-act" id="cmt-confirm-btn" onclick="confirmAction()">Confirm</button>
+      <button class="btn-close-act" onclick="closeComment()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'psl_procurement_v2';
+const ROLE_LABEL = {requester:'Requester',supervisor:'Supervisor',finance:'Finance Officer',procurement:'Procurement Officer',director:'Director',admin:'Admin'};
+const ROLE_BADGE = {requester:'rb-requester',supervisor:'rb-supervisor',finance:'rb-finance',procurement:'rb-procurement',director:'rb-director',admin:'rb-director'};
+const STAGES = ['Draft','Supervisor Review','Finance Review','Procurement','Director Approval','PO Issued','Complete'];
+
+const DEFAULT_USERS = {
+  requester:   {pass:'req123', name:'Aisha Kamara',    role:'requester',    initials:'AK'},
+  supervisor:  {pass:'sup123', name:'Mohamed Koroma',  role:'supervisor',   initials:'MK'},
+  finance:     {pass:'fin123', name:'Fatmata Sesay',   role:'finance',      initials:'FS'},
+  procurement: {pass:'pro123', name:'Ibrahim Bangura', role:'procurement',  initials:'IB'},
+  director:    {pass:'dir123', name:'Dr. Sahr Ngauja', role:'director',     initials:'SN'},
+  admin:       {pass:'admin123',name:'System Admin',   role:'admin',        initials:'SA'}
+};
+
+const DEFAULT_REQUESTS = [
+  {id:'PR-001',item:'Laptop batteries (x10)',dept:'ICT',qty:10,cost:850000,urgency:'Urgent',date:'2026-05-15',justification:'Existing batteries failing; remote working capability severely impacted.',supplier:'TechMart SL',budget:'ICT-2026-Q2',notes:'Lenovo ThinkPad compatible batteries preferred.',stage:5,log:[
+    {who:'Aisha Kamara',role:'Requester',action:'Submitted request',time:'Apr 20, 09:12',color:'blue'},
+    {who:'Mohamed Koroma',role:'Supervisor',action:'Approved — Supervisor Review',time:'Apr 21, 10:30',color:'green'},
+    {who:'Fatmata Sesay',role:'Finance Officer',action:'Budget confirmed — Finance Review',time:'Apr 21, 14:05',color:'green'},
+    {who:'Ibrahim Bangura',role:'Procurement Officer',action:'Vendor verified — Procurement stage',time:'Apr 22, 11:20',color:'green'},
+    {who:'Dr. Sahr Ngauja',role:'Director',action:'Director approved — Final approval granted',time:'Apr 23, 09:00',color:'green'},
+    {who:'Ibrahim Bangura',role:'Procurement Officer',action:'Purchase order issued to TechMart SL',time:'Apr 24, 10:00',color:'blue'}
+  ]},
+  {id:'PR-002',item:'Printer cartridges — Canon PG-245',dept:'Administration',qty:20,cost:120000,urgency:'Routine',date:'2026-05-30',justification:'Monthly replenishment of printing supplies for the administration block.',supplier:'',budget:'ADM-2026-Q2',notes:'',stage:1,log:[
+    {who:'Aisha Kamara',role:'Requester',action:'Submitted request',time:'Apr 24, 14:30',color:'blue'}
+  ]},
+  {id:'PR-003',item:'Conference room chairs (x15)',dept:'Plenary',qty:15,cost:2500000,urgency:'Routine',date:'2026-06-15',justification:'Replacing damaged seating in Conference Room B ahead of upcoming committee sessions.',supplier:'Freetown Furniture Ltd',budget:'PLN-2026-Q2',notes:'Upholstered ergonomic chairs matching existing furniture.',stage:2,log:[
+    {who:'Aisha Kamara',role:'Requester',action:'Submitted request',time:'Apr 23, 08:00',color:'blue'},
+    {who:'Mohamed Koroma',role:'Supervisor',action:'Approved — forwarded to Finance',time:'Apr 24, 09:15',color:'green'}
+  ]},
+  {id:'PR-004',item:'USB hubs and peripheral cables',dept:'ICT',qty:30,cost:45000,urgency:'Routine',date:'2026-05-10',justification:'Replacing damaged peripheral cables across departments following ICT audit.',supplier:'',budget:'ICT-2026-Q1',notes:'',stage:6,log:[
+    {who:'Aisha Kamara',role:'Requester',action:'Submitted request',time:'Apr 15, 10:00',color:'blue'},
+    {who:'Mohamed Koroma',role:'Supervisor',action:'Approved',time:'Apr 16, 09:00',color:'green'},
+    {who:'Fatmata Sesay',role:'Finance Officer',action:'Budget confirmed',time:'Apr 16, 15:00',color:'green'},
+    {who:'Ibrahim Bangura',role:'Procurement Officer',action:'Vendor confirmed',time:'Apr 17, 11:00',color:'green'},
+    {who:'Dr. Sahr Ngauja',role:'Director',action:'Director approved',time:'Apr 18, 09:30',color:'green'},
+    {who:'Ibrahim Bangura',role:'Procurement Officer',action:'PO issued',time:'Apr 19, 10:00',color:'blue'},
+    {who:'Ibrahim Bangura',role:'Procurement Officer',action:'Goods received and recorded — process complete',time:'Apr 22, 14:00',color:'green'}
+  ]}
+];
+
+// ── STATE ──
+let state = {users:{}, requests:[], lastSaved:null};
+let currentUser = null;
+let pendingAction = null;
+
+// ── PERSISTENCE ──
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){ state = JSON.parse(raw); return true; }
+  } catch(e){ console.error('Load failed',e); }
+  return false;
+}
+
+function saveState(){
+  try{
+    state.lastSaved = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    updateSyncUI(true);
+    updateLastSavedLabel();
+  } catch(e){
+    showToast('Save failed — storage may be full','error');
+  }
+}
+
+function resetToDefaults(){
+  if(!confirm('Reset ALL data to factory defaults? This cannot be undone.')) return;
+  state = {users: JSON.parse(JSON.stringify(DEFAULT_USERS)), requests: JSON.parse(JSON.stringify(DEFAULT_REQUESTS)), lastSaved: new Date().toISOString()};
+  saveState();
+  renderRequests();
+  renderActivity();
+  renderUserTable();
+  showToast('Reset to factory defaults','warn');
+}
+
+function exportData(){
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'procurement_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Data exported successfully','success');
+}
+
+function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try{
+      const imported = JSON.parse(ev.target.result);
+      if(!imported.users || !imported.requests) throw new Error('Invalid format');
+      if(!confirm('Import this data? Current data will be replaced.')) return;
+      state = imported;
+      saveState();
+      renderRequests();
+      renderActivity();
+      renderUserTable();
+      showToast('Data imported successfully','success');
+    } catch(err){ showToast('Import failed — invalid file','error'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function updateSyncUI(saved){
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  if(saved){ dot.className='sync-dot'; lbl.textContent='Saved'; }
+  else { dot.className='sync-dot syncing'; lbl.textContent='Saving...'; }
+}
+
+function updateLastSavedLabel(){
+  const el = document.getElementById('last-saved-label');
+  if(!el || !state.lastSaved) return;
+  const d = new Date(state.lastSaved);
+  el.textContent = 'Last saved: '+d.toLocaleString();
+}
+
+// ── AUTH ──
+function doLogin(){
+  const u = document.getElementById('login-user').value.trim().toLowerCase();
+  const p = document.getElementById('login-pass').value;
+  const user = state.users[u];
+  if(!user || user.pass !== p){ document.getElementById('login-error').textContent='Invalid username or password.'; return; }
+  currentUser = {...user, username:u};
+  document.getElementById('login-error').textContent='';
+  document.getElementById('tb-avatar').textContent = user.initials;
+  document.getElementById('tb-name').textContent = user.name;
+  document.getElementById('tb-role-txt').textContent = ROLE_LABEL[user.role]||user.role;
+  const badge = document.getElementById('tb-role-badge');
+  badge.textContent = ROLE_LABEL[user.role]||user.role;
+  badge.className = 'role-badge '+(ROLE_BADGE[user.role]||'rb-requester');
+  document.getElementById('tab-new-btn').style.display = user.role==='requester'?'':'none';
+  document.getElementById('tab-admin-btn').style.display = user.role==='admin'?'':'none';
+  document.getElementById('screen-login').style.display='none';
+  document.getElementById('screen-app').style.display='block';
+  updateLastSavedLabel();
+  renderRequests();
+}
+
+function doLogout(){
+  currentUser = null;
+  document.getElementById('screen-app').style.display='none';
+  document.getElementById('screen-login').style.display='flex';
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+}
+
+// ── ROLE LOGIC ──
+function stageForRole(role){ return {supervisor:1,finance:2,procurement:3,director:4}[role]??-1; }
+function canAct(req){
+  if(!currentUser) return false;
+  if(currentUser.role==='requester'||currentUser.role==='admin') return false;
+  return req.stage===stageForRole(currentUser.role);
+}
+function stageClass(req){
+  if(req.stage===0) return['Draft','st-draft'];
+  if(req.stage>=6) return['Complete','st-complete'];
+  if(req.stage===5) return['PO Issued','st-po'];
+  return[STAGES[req.stage]+' Pending','st-pending'];
+}
+
+// ── RENDER REQUESTS ──
+function renderRequests(){
+  const list = document.getElementById('req-list');
+  list.innerHTML='';
+  let visible = state.requests;
+  if(currentUser && currentUser.role!=='requester' && currentUser.role!=='admin'){
+    const ms = stageForRole(currentUser.role);
+    visible = state.requests.filter(r=>r.stage>=ms||r.stage>=5);
+  }
+  if(!visible.length){ list.innerHTML='<div class="empty-state">No procurement requests to display.</div>'; updateMetrics(); return; }
+  visible.forEach(r=>{
+    const[lbl,cls]=stageClass(r);
+    const act=canAct(r);
+    const total=r.qty&&r.cost?(r.qty*r.cost).toLocaleString():'—';
+    list.innerHTML+=`<div class="req-card${act?' actionable':''}" onclick="openRequest('${r.id}')">
+      <div>
+        <div class="req-id">${r.id}</div>
+        <div class="req-name">${r.item}</div>
+        <div class="req-meta">${r.dept} &middot; Qty: ${r.qty}${r.cost?` &middot; SLL ${total}`:''} &middot; ${r.urgency}</div>
+      </div>
+      <div class="req-card-right">
+        <span class="status-tag ${cls}">${lbl}</span>
+        ${act?'<span style="font-size:11px;color:var(--blue-600);font-weight:600">Action needed</span>':''}
+        <span style="color:var(--text-muted);font-size:18px">&rsaquo;</span>
+      </div>
+    </div>`;
+  });
+  updateMetrics();
+}
+
+function updateMetrics(){
+  document.getElementById('m-total').textContent=state.requests.length;
+  document.getElementById('m-pending').textContent=state.requests.filter(r=>r.stage>0&&r.stage<5).length;
+  document.getElementById('m-approved').textContent=state.requests.filter(r=>r.stage>=4&&r.stage<6).length;
+  document.getElementById('m-complete').textContent=state.requests.filter(r=>r.stage>=6).length;
+}
+
+// ── REQUEST DETAIL ──
+function openRequest(id){
+  const req = state.requests.find(r=>r.id===id);
+  if(!req) return;
+  document.getElementById('modal-title').textContent=req.item;
+  document.getElementById('modal-id').innerHTML=req.id+' &middot; '+req.dept;
+  const stageHtml=STAGES.map((s,i)=>{
+    let dc='',lc='';
+    if(i<req.stage){dc='done';lc='done';}else if(i===req.stage){dc='active';lc='active';}
+    return`<div class="stage-step"><div class="stage-step-inner"><div class="stage-dot ${dc}">${i<req.stage?'&#x2713;':i+1}</div><div class="stage-label ${lc}">${s}</div></div></div>`;
+  }).join('');
+  const total=req.qty&&req.cost?(req.qty*req.cost).toLocaleString():'—';
+  const logHtml=req.log.map(l=>`<div class="mli"><div class="mli-dot ${l.color}"></div><div><div class="mli-text"><span class="mli-who">${l.who}</span> (${l.role})<br>${l.action}</div><div class="mli-time">${l.time}</div></div></div>`).join('');
+  document.getElementById('modal-body').innerHTML=`
+    <div class="stage-progress">${stageHtml}</div>
+    <div class="detail-grid">
+      <div><div class="detail-label">Department</div><div class="detail-value">${req.dept}</div></div>
+      <div><div class="detail-label">Urgency</div><div class="detail-value">${req.urgency}</div></div>
+      <div><div class="detail-label">Quantity</div><div class="detail-value">${req.qty}</div></div>
+      <div><div class="detail-label">Unit cost (SLL)</div><div class="detail-value">${req.cost?req.cost.toLocaleString():'—'}</div></div>
+      <div><div class="detail-label">Total value (SLL)</div><div class="detail-value total">${total}</div></div>
+      <div><div class="detail-label">Required by</div><div class="detail-value">${req.date||'—'}</div></div>
+      ${req.supplier?`<div><div class="detail-label">Supplier</div><div class="detail-value">${req.supplier}</div></div>`:''}
+      ${req.budget?`<div><div class="detail-label">Budget line</div><div class="detail-value" style="font-family:'DM Mono',monospace;font-size:12px">${req.budget}</div></div>`:''}
+    </div>
+    <div class="jbox"><strong>Business justification</strong>${req.justification}</div>
+    ${req.notes?`<div class="jbox" style="border-left-color:var(--gray-200)"><strong>Additional notes</strong>${req.notes}</div>`:''}
+    <div class="modal-log-title">Approval trail</div>${logHtml}
+  `;
+  const acts=document.getElementById('modal-actions');
+  acts.innerHTML='';
+  if(canAct(req)){
+    acts.innerHTML+=`<button class="btn-approve-act" onclick="triggerAction('${id}','approve')">Approve</button>`;
+    acts.innerHTML+=`<button class="btn-reject-act" onclick="triggerAction('${id}','reject')">Reject</button>`;
+    if(req.stage===3) acts.innerHTML+=`<button class="btn-po-act" onclick="triggerAction('${id}','po')">Issue PO</button>`;
+    if(req.stage===4) acts.innerHTML+=`<button class="btn-po-act" onclick="triggerAction('${id}','complete')">Mark Complete</button>`;
+  } else if(req.stage>=6){
+    acts.innerHTML='<span style="font-size:13px;color:var(--teal-600);font-weight:500">&#x2713; Procurement process complete</span>';
+  } else {
+    acts.innerHTML=`<span style="font-size:13px;color:var(--text-muted)">Awaiting: <strong>${STAGES[req.stage]}</strong></span>`;
+  }
+  acts.innerHTML+=`<button class="btn-close-act" onclick="closeModal()">Close</button>`;
+  document.getElementById('req-modal').classList.add('open');
+}
+
+function closeModal(){ document.getElementById('req-modal').classList.remove('open'); }
+function handleOverlayClick(e,id){ if(e.target.id===id) closeModal(); }
+
+function triggerAction(id,type){
+  pendingAction={id,type};
+  const titles={approve:'Approve request',reject:'Reject request',po:'Issue purchase order',complete:'Mark as complete'};
+  document.getElementById('cmt-title').textContent=titles[type];
+  document.getElementById('cmt-text').value='';
+  const btn=document.getElementById('cmt-confirm-btn');
+  btn.textContent=type==='reject'?'Reject':type==='po'?'Issue PO':type==='complete'?'Complete':'Approve';
+  btn.className=type==='reject'?'btn-reject-act':type==='po'||type==='complete'?'btn-po-act':'btn-approve-act';
+  document.getElementById('comment-modal').classList.add('open');
+}
+function closeComment(){ document.getElementById('comment-modal').classList.remove('open'); pendingAction=null; }
+
+function confirmAction(){
+  if(!pendingAction) return;
+  const{id,type}=pendingAction;
+  const req=state.requests.find(r=>r.id===id);
+  const comment=document.getElementById('cmt-text').value.trim();
+  const now=new Date().toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  let action='';
+  if(type==='approve'){
+    req.stage=Math.min(req.stage+1,6);
+    const sm={1:'Supervisor approved',2:'Finance confirmed',3:'Procurement verified',4:'Director approved',5:'PO issued',6:'Complete'};
+    action=(comment?comment+' — ':'')+(sm[req.stage]||'Approved');
+    showToast('Request approved and forwarded','success');
+  } else if(type==='reject'){
+    action='Rejected'+(comment?' — '+comment:'');
+    req.stage=0;
+    showToast('Request rejected and returned to draft','error');
+  } else if(type==='po'){
+    req.stage=5;
+    action='Purchase order issued'+(comment?' — '+comment:'');
+    showToast('Purchase order issued','success');
+  } else if(type==='complete'){
+    req.stage=6;
+    action='Marked complete'+(comment?' — '+comment:'');
+    showToast('Procurement marked as complete','success');
+  }
+  req.log.push({who:currentUser.name,role:ROLE_LABEL[currentUser.role]||currentUser.role,action,time:now,color:type==='reject'?'red':type==='po'||type==='complete'?'blue':'green'});
+  saveState();
+  closeComment();
+  closeModal();
+  renderRequests();
+  renderActivity();
+  pendingAction=null;
+}
+
+// ── SUBMIT REQUEST ──
+function submitRequest(){
+  const item=document.getElementById('f-item').value.trim();
+  const dept=document.getElementById('f-dept').value;
+  const qty=parseInt(document.getElementById('f-qty').value)||0;
+  const justification=document.getElementById('f-justification').value.trim();
+  const err=document.getElementById('form-error');
+  if(!item||!dept||!qty||!justification){ err.textContent='Please complete all required fields.'; return; }
+  err.textContent='';
+  const num=state.requests.length+1;
+  const id='PR-'+(num<10?'00':num<100?'0':'')+num;
+  const now=new Date().toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  state.requests.unshift({
+    id,item,dept,qty,
+    cost:parseInt(document.getElementById('f-cost').value)||0,
+    urgency:document.getElementById('f-urgency').value,
+    date:document.getElementById('f-date').value,
+    justification,
+    supplier:document.getElementById('f-supplier').value.trim(),
+    budget:document.getElementById('f-budget').value.trim(),
+    notes:document.getElementById('f-notes').value.trim(),
+    stage:1,
+    log:[{who:currentUser.name,role:ROLE_LABEL[currentUser.role],action:'Submitted request',time:now,color:'blue'}]
+  });
+  saveState();
+  clearForm();
+  showToast('Request submitted successfully','success');
+  switchTab('requests',document.querySelector('.tab-btn'));
+}
+
+function clearForm(){
+  ['f-item','f-dept','f-qty','f-cost','f-justification','f-supplier','f-budget','f-notes','f-date'].forEach(fid=>{
+    const el=document.getElementById(fid);if(el)el.value='';
+  });
+  document.getElementById('form-error').textContent='';
+}
+
+// ── ACTIVITY ──
+function renderActivity(){
+  const all=state.requests.flatMap(r=>r.log.map(l=>({...l,reqId:r.id})));
+  document.getElementById('activity-list').innerHTML=all.reverse().map(l=>`
+    <div class="act-item">
+      <div class="act-dot ${l.color}"></div>
+      <div>
+        <div class="act-text"><span class="act-req">${l.reqId}</span>${l.action} &mdash; <strong>${l.who}</strong> <span style="color:var(--text-muted)">(${l.role})</span></div>
+        <div class="act-time">${l.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── ADMIN ──
+function renderUserTable(){
+  const tbody=document.getElementById('user-table-body');
+  tbody.innerHTML=Object.entries(state.users).map(([uname,u])=>`
+    <tr>
+      <td><code style="font-family:'DM Mono',monospace;font-size:12px">${uname}</code></td>
+      <td>${u.name}</td>
+      <td><span class="role-badge ${ROLE_BADGE[u.role]||'rb-requester'}" style="display:inline-block">${ROLE_LABEL[u.role]||u.role}</span></td>
+      <td><div class="tb-avatar" style="width:26px;height:26px;font-size:10px;display:inline-flex">${u.initials}</div></td>
+      <td>${uname==='admin'?'':'<button class="btn-del" onclick="deleteUser(\''+uname+'\')">Remove</button>'}</td>
+    </tr>
+  `).join('');
+}
+
+function addUser(){
+  const uname=document.getElementById('nu-user').value.trim().toLowerCase();
+  const pass=document.getElementById('nu-pass').value.trim();
+  const name=document.getElementById('nu-name').value.trim();
+  const role=document.getElementById('nu-role').value;
+  const err=document.getElementById('admin-error');
+  if(!uname||!pass||!name){ err.textContent='All fields are required.'; return; }
+  if(state.users[uname]){ err.textContent='Username already exists.'; return; }
+  if(!/^[a-z0-9_]+$/.test(uname)){ err.textContent='Username: lowercase letters, numbers, underscores only.'; return; }
+  err.textContent='';
+  const parts=name.split(' ').filter(Boolean);
+  const initials=(parts[0]?.[0]||'')+(parts[1]?.[0]||parts[0]?.[1]||'');
+  state.users[uname]={pass,name,role,initials:initials.toUpperCase()};
+  saveState();
+  renderUserTable();
+  ['nu-user','nu-pass','nu-name'].forEach(id=>document.getElementById(id).value='');
+  showToast(`User "${uname}" added`,'success');
+}
+
+function deleteUser(uname){
+  if(uname===currentUser?.username){ showToast('Cannot delete your own account','error'); return; }
+  if(!confirm(`Remove user "${uname}"?`)) return;
+  delete state.users[uname];
+  saveState();
+  renderUserTable();
+  showToast(`User "${uname}" removed`,'warn');
+}
+
+// ── TABS ──
+function switchTab(tab,el){
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+tab).classList.add('active');
+  if(tab==='requests') renderRequests();
+  if(tab==='activity') renderActivity();
+  if(tab==='admin') renderUserTable();
+}
+
+// ── TOAST ──
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+(type||'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ── INIT ──
+window.addEventListener('load',()=>{
+  const had = loadState();
+  if(!had || !state.users || Object.keys(state.users).length===0){
+    state={
+      users:JSON.parse(JSON.stringify(DEFAULT_USERS)),
+      requests:JSON.parse(JSON.stringify(DEFAULT_REQUESTS)),
+      lastSaved:new Date().toISOString()
+    };
+    saveState();
+  }
+  setTimeout(()=>{
+    document.getElementById('screen-loading').style.display='none';
+    document.getElementById('screen-login').style.display='flex';
+  },700);
+});
+
+document.getElementById('login-pass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>
