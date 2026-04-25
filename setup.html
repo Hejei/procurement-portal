@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procurement Portal — Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#042C53,#185FA5 60%,#378ADD);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
+.card{background:white;border-radius:16px;padding:2rem;max-width:520px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.18)}
+.logo{width:48px;height:48px;background:#185FA5;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.logo svg{width:26px;height:26px;fill:none;stroke:white;stroke-width:2}
+h1{font-size:20px;font-weight:600;color:#1E1E1C;text-align:center;margin-bottom:4px}
+.sub{font-size:13px;color:#888780;text-align:center;margin-bottom:1.5rem}
+.step{background:#F2F2EF;border-radius:10px;padding:14px 16px;margin-bottom:12px;font-size:13px;color:#3A3A37;border-left:3px solid #185FA5}
+.step strong{display:block;font-size:12px;font-weight:600;color:#185FA5;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.btn{width:100%;padding:12px;background:#185FA5;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s;margin-top:8px}
+.btn:hover{background:#0C447C}
+.btn:disabled{background:#888780;cursor:not-allowed}
+.status{margin-top:1rem;padding:14px;border-radius:10px;font-size:13px;display:none;line-height:1.6}
+.status.running{background:#FAEEDA;color:#854F0B;border:1px solid #FAC775;display:block}
+.status.success{background:#E1F5EE;color:#0F6E56;border:1px solid #9FE1CB;display:block}
+.status.error{background:#FCEBEB;color:#A32D2D;border:1px solid #F7C1C1;display:block}
+.users-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:1rem}
+.users-table th{text-align:left;padding:8px 10px;font-size:11px;font-weight:600;color:#888780;text-transform:uppercase;border-bottom:1px solid #E8E8E4}
+.users-table td{padding:8px 10px;border-bottom:1px solid #E8E8E4;color:#1E1E1C}
+.users-table td:nth-child(2){font-family:'DM Mono',monospace;font-size:12px;color:#185FA5}
+code{font-family:'DM Mono',monospace;font-size:12px;background:#E6F1FB;color:#185FA5;padding:2px 6px;border-radius:4px}
+.divider{border:none;border-top:1px solid #E8E8E4;margin:1.25rem 0}
+.go-link{display:block;text-align:center;margin-top:1rem;padding:11px;background:#1D9E75;color:white;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none}
+.go-link:hover{background:#0F6E56}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+  </div>
+  <h1>Procurement Portal Setup</h1>
+  <p class="sub">Parliament of Sierra Leone &mdash; One-time cloud initialisation</p>
+
+  <div class="step">
+    <strong>What this does</strong>
+    This page pushes the default users and sample data into your JSONBin cloud storage. Run it once — after that, use the main portal normally.
+  </div>
+
+  <table class="users-table">
+    <thead><tr><th>Username</th><th>Password</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td>requester</td><td>req123</td><td>Requester</td></tr>
+      <tr><td>supervisor</td><td>sup123</td><td>Supervisor</td></tr>
+      <tr><td>finance</td><td>fin123</td><td>Finance Officer</td></tr>
+      <tr><td>procurement</td><td>pro123</td><td>Procurement Officer</td></tr>
+      <tr><td>director</td><td>dir123</td><td>Director</td></tr>
+      <tr><td>admin</td><td>admin123</td><td>Admin</td></tr>
+    </tbody>
+  </table>
+
+  <hr class="divider">
+
+  <button class="btn" id="init-btn" onclick="runSetup()">&#9654; Initialise cloud data now</button>
+  <div class="status" id="status"></div>
+  <a class="go-link" id="go-link" href="index.html" style="display:none">&#x2714; Go to Procurement Portal</a>
+</div>
+
+<script>
+const BIN_ID  = '69eca23b856a6821896f512a';
+const API_KEY = '$2a$10$x/qM8Huhv4vv56bTMxNgjeIs9c05xl4URtgMDtsqwj1R.BAPCPTne';
+const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+const INITIAL_DATA = {
+  users: {
+    requester:   { pass:'req123',   name:'Aisha Kamara',    role:'requester',   initials:'AK' },
+    supervisor:  { pass:'sup123',   name:'Mohamed Koroma',  role:'supervisor',  initials:'MK' },
+    finance:     { pass:'fin123',   name:'Fatmata Sesay',   role:'finance',     initials:'FS' },
+    procurement: { pass:'pro123',   name:'Ibrahim Bangura', role:'procurement', initials:'IB' },
+    director:    { pass:'dir123',   name:'Dr. Sahr Ngauja', role:'director',    initials:'SN' },
+    admin:       { pass:'admin123', name:'System Admin',    role:'admin',       initials:'SA' }
+  },
+  requests: [
+    {
+      id:'PR-001', item:'Laptop batteries (x10)', dept:'ICT', qty:10, cost:850000,
+      urgency:'Urgent', date:'2026-05-15',
+      justification:'Existing batteries failing; remote working capability impacted.',
+      supplier:'TechMart SL', budget:'ICT-2026-Q2', notes:'Lenovo ThinkPad compatible.',
+      stage:5,
+      log:[
+        {who:'Aisha Kamara',    role:'Requester',           action:'Submitted request',              time:'Apr 20, 09:12', color:'blue'},
+        {who:'Mohamed Koroma',  role:'Supervisor',          action:'Supervisor approved',            time:'Apr 21, 10:30', color:'green'},
+        {who:'Fatmata Sesay',   role:'Finance Officer',     action:'Finance confirmed',              time:'Apr 21, 14:05', color:'green'},
+        {who:'Ibrahim Bangura', role:'Procurement Officer', action:'Procurement verified',           time:'Apr 22, 11:20', color:'green'},
+        {who:'Dr. Sahr Ngauja', role:'Director',            action:'Director approved',              time:'Apr 23, 09:00', color:'green'},
+        {who:'Ibrahim Bangura', role:'Procurement Officer', action:'Purchase order issued to TechMart SL', time:'Apr 24, 10:00', color:'blue'}
+      ]
+    },
+    {
+      id:'PR-002', item:'Printer cartridges — Canon PG-245', dept:'Administration', qty:20, cost:120000,
+      urgency:'Routine', date:'2026-05-30',
+      justification:'Monthly replenishment of printing supplies for the administration block.',
+      supplier:'', budget:'ADM-2026-Q2', notes:'', stage:1,
+      log:[
+        {who:'Aisha Kamara', role:'Requester', action:'Submitted request', time:'Apr 24, 14:30', color:'blue'}
+      ]
+    },
+    {
+      id:'PR-003', item:'Conference room chairs (x15)', dept:'Plenary', qty:15, cost:2500000,
+      urgency:'Routine', date:'2026-06-15',
+      justification:'Replacing damaged seating in Conference Room B ahead of upcoming committee sessions.',
+      supplier:'Freetown Furniture Ltd', budget:'PLN-2026-Q2', notes:'Upholstered ergonomic chairs.', stage:2,
+      log:[
+        {who:'Aisha Kamara',   role:'Requester',  action:'Submitted request',       time:'Apr 23, 08:00', color:'blue'},
+        {who:'Mohamed Koroma', role:'Supervisor',  action:'Supervisor approved',     time:'Apr 24, 09:15', color:'green'}
+      ]
+    },
+    {
+      id:'PR-004', item:'USB hubs and peripheral cables', dept:'ICT', qty:30, cost:45000,
+      urgency:'Routine', date:'2026-05-10',
+      justification:'Replacing damaged cables across departments following ICT audit.',
+      supplier:'', budget:'ICT-2026-Q1', notes:'', stage:6,
+      log:[
+        {who:'Aisha Kamara',    role:'Requester',           action:'Submitted request',               time:'Apr 15, 10:00', color:'blue'},
+        {who:'Mohamed Koroma',  role:'Supervisor',          action:'Supervisor approved',             time:'Apr 16, 09:00', color:'green'},
+        {who:'Fatmata Sesay',   role:'Finance Officer',     action:'Finance confirmed',               time:'Apr 16, 15:00', color:'green'},
+        {who:'Ibrahim Bangura', role:'Procurement Officer', action:'Procurement verified',            time:'Apr 17, 11:00', color:'green'},
+        {who:'Dr. Sahr Ngauja', role:'Director',            action:'Director approved',               time:'Apr 18, 09:30', color:'green'},
+        {who:'Ibrahim Bangura', role:'Procurement Officer', action:'Purchase order issued',           time:'Apr 19, 10:00', color:'blue'},
+        {who:'Ibrahim Bangura', role:'Procurement Officer', action:'Goods received — process complete', time:'Apr 22, 14:00', color:'green'}
+      ]
+    }
+  ]
+};
+
+async function runSetup() {
+  const btn = document.getElementById('init-btn');
+  const status = document.getElementById('status');
+  btn.disabled = true;
+  btn.textContent = 'Initialising...';
+  status.className = 'status running';
+  status.textContent = 'Connecting to JSONBin cloud storage...';
+
+  try {
+    status.textContent = 'Pushing user accounts and sample data to cloud...';
+    const res = await fetch(BIN_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': API_KEY
+      },
+      body: JSON.stringify(INITIAL_DATA)
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Server returned ${res.status}: ${errText}`);
+    }
+
+    const result = await res.json();
+    status.className = 'status success';
+    status.innerHTML = `
+      <strong style="font-size:14px">&#x2714; Setup complete!</strong><br><br>
+      Cloud storage initialised successfully.<br>
+      Bin ID: <code>${result.metadata?.id || BIN_ID}</code><br><br>
+      You can now sign in to the portal with any of the credentials in the table above.
+      The <strong>admin</strong> account can manage users and add real staff accounts.
+    `;
+    btn.textContent = '✓ Done';
+    document.getElementById('go-link').style.display = 'block';
+
+  } catch (err) {
+    status.className = 'status error';
+    status.innerHTML = `
+      <strong>Setup failed</strong><br><br>
+      ${err.message}<br><br>
+      <strong>Common causes:</strong><br>
+      &bull; No internet connection<br>
+      &bull; JSONBin API key has expired — generate a new one at jsonbin.io<br>
+      &bull; Bin ID is incorrect
+    `;
+    btn.disabled = false;
+    btn.textContent = '↺ Try again';
+  }
+}
+</script>
+</body>
+</html>
