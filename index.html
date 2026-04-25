@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procurement Portal — Parliament of Sierra Leone</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue-50:#E6F1FB;--blue-100:#B5D4F4;--blue-200:#85B7EB;--blue-400:#378ADD;
+  --blue-600:#185FA5;--blue-800:#0C447C;--blue-900:#042C53;
+  --teal-50:#E1F5EE;--teal-100:#9FE1CB;--teal-400:#1D9E75;--teal-600:#0F6E56;--teal-800:#085041;
+  --amber-50:#FAEEDA;--amber-100:#FAC775;--amber-200:#EF9F27;--amber-600:#854F0B;
+  --red-50:#FCEBEB;--red-100:#F7C1C1;--red-400:#E24B4A;--red-600:#A32D2D;
+  --purple-50:#EEEDFE;--purple-600:#534AB7;--purple-800:#3C3489;
+  --green-50:#EAF3DE;--green-600:#3B6D11;
+  --gray-50:#F5F5F3;--gray-100:#E8E8E4;--gray-200:#D3D1C7;--gray-400:#888780;
+  --gray-600:#5F5E5A;--gray-800:#3A3A37;--gray-900:#1E1E1C;
+  --bg:#FAFAF8;--bg-card:#FFFFFF;--bg-surface:#F2F2EF;
+  --text-primary:#1E1E1C;--text-secondary:#5F5E5A;--text-muted:#888780;
+  --border:rgba(0,0,0,0.1);--border-strong:rgba(0,0,0,0.18);
+  --radius:10px;--radius-lg:14px;
+  --shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.08),0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:0 8px 24px rgba(0,0,0,0.1),0 4px 8px rgba(0,0,0,0.06);
+}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;font-size:15px;line-height:1.6}
+
+/* ── LOADING ── */
+#screen-loading{min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:linear-gradient(135deg,#042C53 0%,#185FA5 60%,#378ADD 100%)}
+.loading-logo{width:64px;height:64px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);border-radius:16px;display:flex;align-items:center;justify-content:center}
+.loading-logo svg{width:32px;height:32px;fill:none;stroke:white;stroke-width:1.8}
+.loading-text{font-size:14px;color:rgba(255,255,255,0.6);letter-spacing:0.02em}
+.loading-spinner{width:22px;height:22px;border:2px solid rgba(255,255,255,0.2);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite}
+.loading-status{font-size:12px;color:rgba(255,255,255,0.4);min-height:16px;text-align:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── LOGIN ── */
+#screen-login{min-height:100vh;display:none;align-items:center;justify-content:center;background:linear-gradient(135deg,#042C53 0%,#185FA5 60%,#378ADD 100%);padding:2rem 1rem}
+.login-container{width:100%;max-width:420px}
+.login-header{text-align:center;margin-bottom:2rem}
+.login-emblem{width:64px;height:64px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.3);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;backdrop-filter:blur(8px)}
+.login-emblem svg{width:32px;height:32px;fill:none;stroke:white;stroke-width:1.8}
+.login-header h1{font-size:22px;font-weight:600;color:white;letter-spacing:-0.02em}
+.login-header p{font-size:13px;color:rgba(255,255,255,0.6);margin-top:4px}
+.login-card{background:white;border-radius:var(--radius-lg);padding:2rem;box-shadow:var(--shadow-lg)}
+.cloud-pill{display:inline-flex;align-items:center;gap:6px;background:var(--teal-50);color:var(--teal-600);font-size:12px;font-weight:500;padding:5px 12px;border-radius:20px;margin-bottom:1.25rem;border:1px solid var(--teal-100)}
+.cloud-pill svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;letter-spacing:0.02em}
+.field input{width:100%;padding:10px 14px;font-size:14px;font-family:inherit;border:1px solid var(--border-strong);border-radius:var(--radius);background:white;color:var(--text-primary);outline:none;transition:border-color .15s,box-shadow .15s}
+.field input:focus{border-color:var(--blue-600);box-shadow:0 0 0 3px rgba(24,95,165,.12)}
+.login-error{font-size:12px;color:var(--red-600);margin-top:6px;min-height:16px}
+.btn-login{width:100%;padding:11px;background:var(--blue-600);color:white;border:none;border-radius:var(--radius);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s,transform .1s;margin-top:4px}
+.btn-login:hover{background:var(--blue-800)}
+.btn-login:active{transform:scale(0.99)}
+.btn-login:disabled{background:var(--gray-400);cursor:not-allowed}
+.login-footer{text-align:center;margin-top:1.25rem;font-size:12px;color:rgba(255,255,255,0.4)}
+
+/* ── APP ── */
+#screen-app{display:none;min-height:100vh}
+.topbar{position:sticky;top:0;z-index:50;background:var(--blue-900);border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:56px}
+.tb-left{display:flex;align-items:center;gap:12px}
+.tb-logo{width:34px;height:34px;background:var(--blue-600);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.tb-logo svg{width:18px;height:18px;fill:none;stroke:white;stroke-width:2}
+.tb-org-name{font-size:14px;font-weight:600;color:white;line-height:1.2}
+.tb-org-sub{font-size:11px;color:rgba(255,255,255,0.4)}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-avatar{width:32px;height:32px;border-radius:50%;background:var(--blue-600);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:white}
+.tb-user-name{font-size:13px;font-weight:500;color:white;line-height:1.2}
+.tb-user-role-txt{font-size:11px;color:rgba(255,255,255,0.5)}
+.role-badge{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500}
+.rb-requester{background:var(--teal-50);color:var(--teal-600)}
+.rb-supervisor{background:var(--amber-50);color:var(--amber-600)}
+.rb-finance{background:var(--purple-50);color:var(--purple-600)}
+.rb-procurement{background:var(--blue-50);color:var(--blue-600)}
+.rb-director{background:var(--red-50);color:var(--red-600)}
+.btn-signout{padding:6px 14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius);color:rgba(255,255,255,0.7);font-size:12px;font-family:inherit;cursor:pointer;transition:background .15s}
+.btn-signout:hover{background:rgba(255,255,255,0.14);color:white}
+
+/* Sync status */
+.sync-pill{display:flex;align-items:center;gap:5px;font-size:11px;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);transition:all .3s}
+.sync-pill.syncing{border-color:rgba(239,159,39,0.5);color:rgba(239,159,39,0.9)}
+.sync-pill.saved{border-color:rgba(29,158,117,0.5);color:rgba(29,158,117,0.9)}
+.sync-pill.error{border-color:rgba(226,75,74,0.5);color:rgba(226,75,74,0.9)}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.sync-dot.spin{animation:spin .7s linear infinite;border-radius:0;background:none;border:1.5px solid currentColor;border-top-color:transparent}
+
+.tab-bar{background:white;border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;gap:0}
+.tab-btn{padding:14px 18px;font-size:13px;font-weight:500;font-family:inherit;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-muted);cursor:pointer;margin-bottom:-1px;transition:color .15s,border-color .15s}
+.tab-btn:hover{color:var(--text-primary)}
+.tab-btn.active{color:var(--blue-600);border-bottom-color:var(--blue-600)}
+
+.main{max-width:960px;margin:0 auto;padding:1.75rem 1.5rem}
+.view{display:none}
+.view.active{display:block}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}
+.metric-card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;box-shadow:var(--shadow)}
+.metric-label{font-size:12px;color:var(--text-muted);margin-bottom:4px}
+.metric-value{font-size:28px;font-weight:600;color:var(--text-primary);letter-spacing:-0.03em}
+.metric-card.m-pending .metric-value{color:var(--amber-600)}
+.metric-card.m-approved .metric-value{color:var(--teal-600)}
+.metric-card.m-complete .metric-value{color:var(--blue-600)}
+
+/* INFO BANNER */
+.info-banner{display:flex;align-items:flex-start;gap:10px;background:var(--blue-50);border:1px solid var(--blue-100);border-radius:var(--radius);padding:10px 14px;margin-bottom:1rem;font-size:12px;color:var(--blue-800)}
+.info-banner svg{width:15px;height:15px;fill:none;stroke:var(--blue-600);stroke-width:2;flex-shrink:0;margin-top:1px}
+
+/* REQUEST LIST */
+.section-title{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:1rem}
+.req-list{display:flex;flex-direction:column;gap:8px}
+.req-card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .15s,box-shadow .15s;box-shadow:var(--shadow)}
+.req-card:hover{border-color:var(--blue-200);box-shadow:var(--shadow-md)}
+.req-card.actionable{border-left:3px solid var(--blue-600);padding-left:15px}
+.req-id{font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;margin-bottom:2px}
+.req-name{font-size:15px;font-weight:500;color:var(--text-primary)}
+.req-meta{font-size:12px;color:var(--text-secondary);margin-top:3px}
+.req-card-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.status-tag{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:500;white-space:nowrap}
+.st-draft{background:var(--gray-100);color:var(--gray-600)}
+.st-pending{background:var(--amber-50);color:var(--amber-600)}
+.st-complete{background:var(--green-50);color:var(--green-600)}
+.st-po{background:var(--purple-50);color:var(--purple-600)}
+.empty-state{text-align:center;padding:3rem;color:var(--text-muted);font-size:14px}
+
+/* FORM */
+.form-card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;box-shadow:var(--shadow);margin-bottom:1rem}
+.form-card-header{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.form-card-icon{width:36px;height:36px;background:var(--blue-50);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.form-card-icon svg{width:18px;height:18px;fill:none;stroke:var(--blue-600);stroke-width:2}
+.form-card-title{font-size:16px;font-weight:600;color:var(--text-primary)}
+.form-card-sub{font-size:12px;color:var(--text-muted);margin-top:1px}
+.stage-chip{font-size:11px;padding:3px 9px;background:var(--blue-50);color:var(--blue-600);border-radius:20px;font-weight:500;margin-left:auto}
+.fsect{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;margin-top:1.25rem}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.cs2{grid-column:span 2}
+.fr label{display:block;font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:5px}
+.fr input,.fr select,.fr textarea{width:100%;padding:9px 12px;font-size:13px;font-family:inherit;border:1px solid var(--border-strong);border-radius:var(--radius);background:white;color:var(--text-primary);outline:none;transition:border-color .15s,box-shadow .15s}
+.fr input:focus,.fr select:focus,.fr textarea:focus{border-color:var(--blue-600);box-shadow:0 0 0 3px rgba(24,95,165,.1)}
+.fr textarea{resize:vertical;min-height:72px}
+.rstar{color:var(--red-400)}
+.form-actions{display:flex;gap:10px;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);flex-wrap:wrap;align-items:center}
+.btn-primary{padding:10px 22px;background:var(--blue-600);color:white;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s}
+.btn-primary:hover{background:var(--blue-800)}
+.btn-primary:disabled{background:var(--gray-400);cursor:not-allowed}
+.btn-secondary{padding:10px 18px;background:none;color:var(--text-secondary);border:1px solid var(--border-strong);border-radius:var(--radius);font-size:13px;font-family:inherit;cursor:pointer;transition:background .15s}
+.btn-secondary:hover{background:var(--bg-surface)}
+.form-error{font-size:12px;color:var(--red-600)}
+
+/* ACTIVITY */
+.activity-list{display:flex;flex-direction:column}
+.act-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+.act-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.act-dot.blue{background:var(--blue-400)}
+.act-dot.green{background:var(--teal-400)}
+.act-dot.red{background:var(--red-400)}
+.act-req{font-family:'DM Mono',monospace;font-size:11px;color:var(--blue-600);background:var(--blue-50);padding:1px 6px;border-radius:4px;margin-right:6px}
+.act-time{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+/* ADMIN */
+.admin-card{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;box-shadow:var(--shadow);margin-bottom:1rem}
+.admin-hdr{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.admin-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.admin-icon svg{width:18px;height:18px;fill:none;stroke-width:2}
+.admin-title{font-size:16px;font-weight:600;color:var(--text-primary)}
+.admin-sub{font-size:12px;color:var(--text-muted);margin-top:1px}
+.user-table{width:100%;border-collapse:collapse;font-size:13px}
+.user-table th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border)}
+.user-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text-primary)}
+.user-table tr:last-child td{border-bottom:none}
+.user-table tr:hover td{background:var(--bg-surface)}
+.btn-del{padding:4px 10px;background:none;border:1px solid var(--red-100);color:var(--red-600);border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit}
+.btn-del:hover{background:var(--red-50)}
+.add-user-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+.au-field label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:500}
+.au-field input,.au-field select{width:100%;padding:8px 10px;font-size:13px;font-family:inherit;border:1px solid var(--border-strong);border-radius:var(--radius);background:white;color:var(--text-primary);outline:none}
+.au-field input:focus,.au-field select:focus{border-color:var(--blue-600)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(4,44,83,0.45);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;backdrop-filter:blur(2px)}
+.modal-overlay.open{display:flex}
+.modal-panel{background:white;border-radius:var(--radius-lg);width:100%;max-width:640px;box-shadow:var(--shadow-lg);margin:auto}
+.modal-topbar{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+.modal-title{font-size:16px;font-weight:600;color:var(--text-primary)}
+.modal-id{font-size:12px;color:var(--text-muted);font-family:'DM Mono',monospace;margin-top:2px}
+.modal-close{width:32px;height:32px;border-radius:8px;border:none;background:var(--bg-surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary)}
+.modal-close:hover{background:var(--gray-200)}
+.modal-body{padding:1.5rem}
+.stage-progress{display:flex;margin-bottom:1.5rem;overflow-x:auto;padding-bottom:4px}
+.stage-step{flex:1;min-width:0}
+.stage-step-inner{display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.stage-step-inner::before{content:'';position:absolute;top:12px;left:50%;width:100%;height:2px;background:var(--gray-200)}
+.stage-step:last-child .stage-step-inner::before{display:none}
+.stage-dot{width:24px;height:24px;border-radius:50%;border:2px solid var(--gray-200);background:white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--text-muted);position:relative;z-index:1;flex-shrink:0}
+.stage-dot.done{background:var(--teal-400);border-color:var(--teal-400);color:white}
+.stage-dot.active{background:var(--blue-600);border-color:var(--blue-600);color:white}
+.stage-lbl{font-size:10px;color:var(--text-muted);text-align:center;white-space:nowrap}
+.stage-lbl.done{color:var(--teal-600)}
+.stage-lbl.active{color:var(--blue-600);font-weight:600}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
+.dl{font-size:11px;color:var(--text-muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:0.04em}
+.dv{font-size:13px;color:var(--text-primary);font-weight:500}
+.dv.total{font-size:16px;color:var(--blue-800)}
+.jbox{background:var(--bg-surface);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;font-size:13px;color:var(--text-primary);border-left:3px solid var(--blue-200)}
+.jbox strong{font-weight:500;color:var(--text-muted);font-size:11px;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em}
+.log-title{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;margin-top:1rem}
+.mli{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.mli-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.mli-dot.blue{background:var(--blue-400)}
+.mli-dot.green{background:var(--teal-400)}
+.mli-dot.red{background:var(--red-400)}
+.mli-who{font-weight:500}
+.mli-time{font-size:11px;color:var(--text-muted);margin-top:2px}
+.modal-actions{display:flex;gap:10px;padding:1.25rem 1.5rem;border-top:1px solid var(--border);flex-wrap:wrap;align-items:center}
+.btn-approve{padding:10px 20px;background:var(--teal-400);color:white;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s}
+.btn-approve:hover{background:var(--teal-600)}
+.btn-reject{padding:10px 18px;background:none;color:var(--red-600);border:1px solid var(--red-100);border-radius:var(--radius);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer}
+.btn-reject:hover{background:var(--red-50)}
+.btn-po{padding:10px 20px;background:var(--purple-600);color:white;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer}
+.btn-po:hover{background:var(--purple-800)}
+.btn-close-modal{padding:10px 18px;background:none;color:var(--text-secondary);border:1px solid var(--border-strong);border-radius:var(--radius);font-size:13px;font-family:inherit;cursor:pointer;margin-left:auto}
+
+/* COMMENT MODAL */
+.cmt-overlay{display:none;position:fixed;inset:0;background:rgba(4,44,83,0.5);z-index:300;align-items:center;justify-content:center;padding:1rem}
+.cmt-overlay.open{display:flex}
+.cmt-panel{background:white;border-radius:var(--radius-lg);padding:1.5rem;width:100%;max-width:380px;box-shadow:var(--shadow-lg)}
+.cmt-title{font-size:16px;font-weight:600;margin-bottom:1rem}
+.cmt-panel textarea{width:100%;padding:10px 12px;font-size:13px;font-family:inherit;border:1px solid var(--border-strong);border-radius:var(--radius);resize:vertical;min-height:80px;outline:none;color:var(--text-primary)}
+.cmt-panel textarea:focus{border-color:var(--blue-600);box-shadow:0 0 0 3px rgba(24,95,165,.1)}
+.cmt-actions{display:flex;gap:8px;margin-top:1rem}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--gray-900);color:white;padding:12px 18px;border-radius:var(--radius);font-size:13px;z-index:500;box-shadow:var(--shadow-lg);transform:translateY(80px);opacity:0;transition:transform .25s,opacity .25s;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--teal-600)}
+.toast.error{background:var(--red-600)}
+.toast.warn{background:var(--amber-600)}
+
+/* AUTO-REFRESH INDICATOR */
+.refresh-bar{background:var(--blue-900);padding:6px 1.5rem;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.45)}
+.refresh-bar a{color:rgba(255,255,255,0.6);cursor:pointer;text-decoration:underline}
+.refresh-bar a:hover{color:white}
+
+@media(max-width:640px){
+  .metrics{grid-template-columns:1fr 1fr}
+  .fg2,.fg3{grid-template-columns:1fr}
+  .cs2{grid-column:span 1}
+  .detail-grid{grid-template-columns:1fr 1fr}
+  .topbar{padding:0 1rem}
+  .main{padding:1rem}
+  .tb-org-sub,.sync-pill span:last-child{display:none}
+  .add-user-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="screen-loading">
+  <div class="loading-logo">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+  </div>
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Procurement Portal</div>
+  <div class="loading-status" id="loading-status">Connecting to cloud...</div>
+</div>
+
+<!-- LOGIN -->
+<div id="screen-login">
+  <div class="login-container">
+    <div class="login-header">
+      <div class="login-emblem">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      </div>
+      <h1>Procurement Portal</h1>
+      <p>Parliament of Sierra Leone</p>
+    </div>
+    <div class="login-card">
+      <div style="text-align:center;margin-bottom:1.25rem">
+        <span class="cloud-pill">
+          <svg viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+          Live cloud sync enabled
+        </span>
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input id="login-user" type="text" placeholder="Enter your username" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="login-pass" type="password" placeholder="Enter your password">
+      </div>
+      <div class="login-error" id="login-error"></div>
+      <button class="btn-login" id="login-btn" onclick="doLogin()">Sign in to portal</button>
+    </div>
+    <div class="login-footer">Parliament of Sierra Leone &mdash; Internal Use Only</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="screen-app">
+  <div class="topbar">
+    <div class="tb-left">
+      <div class="tb-logo">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      </div>
+      <div>
+        <div class="tb-org-name">Procurement Portal</div>
+        <div class="tb-org-sub">Parliament of Sierra Leone</div>
+      </div>
+    </div>
+    <div class="tb-right">
+      <div class="sync-pill" id="sync-pill">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-label">Synced</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="tb-avatar" id="tb-avatar">AK</div>
+        <div>
+          <div class="tb-user-name" id="tb-name">Aisha Kamara</div>
+          <div class="tb-user-role-txt" id="tb-role-txt">Requester</div>
+        </div>
+        <span class="role-badge" id="tb-role-badge">Requester</span>
+      </div>
+      <button class="btn-signout" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+  <div class="refresh-bar">
+    <span>Auto-refreshes every 30 seconds &mdash; <a onclick="loadFromCloud(true)">refresh now</a></span>
+    <span id="last-sync-label"></span>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('requests',this)">All Requests</button>
+    <button class="tab-btn" onclick="switchTab('new',this)" id="tab-new-btn">New Request</button>
+    <button class="tab-btn" onclick="switchTab('activity',this)">Activity Log</button>
+    <button class="tab-btn" onclick="switchTab('admin',this)" id="tab-admin-btn" style="display:none">Admin</button>
+  </div>
+
+  <div class="main">
+
+    <!-- REQUESTS -->
+    <div class="view active" id="view-requests">
+      <div class="info-banner">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>All data is saved to the cloud in real time. Every user connected to this portal sees the same live data. Share the URL: <strong>https://Hejei.github.io/procurement-portal</strong></span>
+      </div>
+      <div class="metrics">
+        <div class="metric-card"><div class="metric-label">Total requests</div><div class="metric-value" id="m-total">0</div></div>
+        <div class="metric-card m-pending"><div class="metric-label">Pending review</div><div class="metric-value" id="m-pending">0</div></div>
+        <div class="metric-card m-approved"><div class="metric-label">Approved</div><div class="metric-value" id="m-approved">0</div></div>
+        <div class="metric-card m-complete"><div class="metric-label">Completed</div><div class="metric-value" id="m-complete">0</div></div>
+      </div>
+      <div class="section-title">Procurement requests</div>
+      <div class="req-list" id="req-list"></div>
+    </div>
+
+    <!-- NEW REQUEST -->
+    <div class="view" id="view-new">
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-card-icon">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </div>
+          <div>
+            <div class="form-card-title">New procurement request</div>
+            <div class="form-card-sub">All required fields marked with *</div>
+          </div>
+          <span class="stage-chip">Stage 1 &mdash; Initiation</span>
+        </div>
+        <div class="fsect">Item information</div>
+        <div class="fg2">
+          <div class="fr cs2">
+            <label>Item / Service description <span class="rstar">*</span></label>
+            <input id="f-item" type="text" placeholder="e.g. Office printer cartridges, consultancy services...">
+          </div>
+          <div class="fr">
+            <label>Department <span class="rstar">*</span></label>
+            <select id="f-dept">
+              <option value="">Select department</option>
+              <option>Administration</option><option>Finance</option><option>ICT</option>
+              <option>Library and Research</option><option>Plenary</option>
+              <option>Public Relations</option><option>Transport</option>
+              <option>Data and Information Unit</option><option>Other</option>
+            </select>
+          </div>
+          <div class="fr">
+            <label>Supplier / Vendor (optional)</label>
+            <input id="f-supplier" type="text" placeholder="Supplier name or contact">
+          </div>
+        </div>
+        <div class="fsect">Quantity &amp; cost</div>
+        <div class="fg3">
+          <div class="fr"><label>Quantity <span class="rstar">*</span></label><input id="f-qty" type="number" min="1" placeholder="0"></div>
+          <div class="fr"><label>Unit cost (SLL)</label><input id="f-cost" type="number" min="0" placeholder="0"></div>
+          <div class="fr"><label>Urgency</label><select id="f-urgency"><option>Routine</option><option>Urgent</option><option>Emergency</option></select></div>
+        </div>
+        <div class="fsect">Details</div>
+        <div class="fg2">
+          <div class="fr"><label>Required by date</label><input id="f-date" type="date"></div>
+          <div class="fr"><label>Budget line / Code (optional)</label><input id="f-budget" type="text" placeholder="e.g. ADM-2026-Q2"></div>
+          <div class="fr cs2"><label>Business justification <span class="rstar">*</span></label><textarea id="f-justification" placeholder="Explain why this procurement is needed..."></textarea></div>
+          <div class="fr cs2"><label>Additional notes / Specifications (optional)</label><textarea id="f-notes" placeholder="Delivery requirements, technical specs..."></textarea></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" id="submit-btn" onclick="submitRequest()">Submit request</button>
+          <button class="btn-secondary" onclick="clearForm()">Clear form</button>
+          <div class="form-error" id="form-error"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY -->
+    <div class="view" id="view-activity">
+      <div class="section-title">All activity &mdash; most recent first</div>
+      <div class="activity-list" id="activity-list"></div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="view" id="view-admin">
+      <div class="admin-card">
+        <div class="admin-hdr">
+          <div class="admin-icon" style="background:var(--blue-50)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--blue-600)"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div>
+            <div class="admin-title">User management</div>
+            <div class="admin-sub">Add or remove portal users. Changes sync to cloud immediately.</div>
+          </div>
+        </div>
+        <table class="user-table">
+          <thead><tr><th>Username</th><th>Full name</th><th>Role</th><th></th></tr></thead>
+          <tbody id="user-tbody"></tbody>
+        </table>
+        <div class="add-user-grid">
+          <div class="au-field"><label>Username</label><input id="nu-user" type="text" placeholder="username"></div>
+          <div class="au-field"><label>Password</label><input id="nu-pass" type="text" placeholder="password"></div>
+          <div class="au-field"><label>Full name</label><input id="nu-name" type="text" placeholder="Full name"></div>
+          <div class="au-field"><label>Role</label>
+            <select id="nu-role">
+              <option value="requester">Requester</option>
+              <option value="supervisor">Supervisor</option>
+              <option value="finance">Finance Officer</option>
+              <option value="procurement">Procurement Officer</option>
+              <option value="director">Director</option>
+            </select>
+          </div>
+          <div class="au-field"><label>&nbsp;</label><button class="btn-primary" onclick="addUser()" style="width:100%">+ Add</button></div>
+        </div>
+        <div class="form-error" id="admin-error" style="margin-top:8px"></div>
+      </div>
+      <div class="admin-card">
+        <div class="admin-hdr">
+          <div class="admin-icon" style="background:var(--teal-50)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--teal-600)"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          </div>
+          <div>
+            <div class="admin-title">Cloud storage</div>
+            <div class="admin-sub">Force push or pull data from JSONBin cloud storage.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn-primary" onclick="loadFromCloud(true)">&#8595; Pull latest from cloud</button>
+          <button class="btn-secondary" onclick="pushToCloud(true)">&#8593; Force push to cloud</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- REQUEST DETAIL MODAL -->
+<div class="modal-overlay" id="req-modal" onclick="handleOverlay(event,'req-modal')">
+  <div class="modal-panel">
+    <div class="modal-topbar">
+      <div>
+        <div class="modal-title" id="modal-title">Request</div>
+        <div class="modal-id" id="modal-id"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<!-- COMMENT MODAL -->
+<div class="cmt-overlay" id="cmt-modal">
+  <div class="cmt-panel">
+    <div class="cmt-title" id="cmt-title">Approve request</div>
+    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px">Comment or reason (optional)</div>
+    <textarea id="cmt-text" placeholder="Enter your comment..."></textarea>
+    <div class="cmt-actions">
+      <button class="btn-approve" id="cmt-confirm" onclick="confirmAction()">Confirm</button>
+      <button class="btn-close-modal" onclick="closeCmt()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ──
+const BIN_ID  = '69eca23b856a6821896f512a';
+const API_KEY = '$2a$10$x/qM8Huhv4vv56bTMxNgjeIs9c05xl4URtgMDtsqwj1R.BAPCPTne';
+const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+const HEADERS = { 'Content-Type':'application/json', 'X-Master-Key': API_KEY };
+
+const ROLE_LABEL = {requester:'Requester',supervisor:'Supervisor',finance:'Finance Officer',procurement:'Procurement Officer',director:'Director',admin:'Admin'};
+const ROLE_BADGE = {requester:'rb-requester',supervisor:'rb-supervisor',finance:'rb-finance',procurement:'rb-procurement',director:'rb-director',admin:'rb-director'};
+const STAGES = ['Draft','Supervisor Review','Finance Review','Procurement','Director Approval','PO Issued','Complete'];
+
+const DEFAULT_USERS = {
+  requester:   {pass:'req123', name:'Aisha Kamara',    role:'requester',   initials:'AK'},
+  supervisor:  {pass:'sup123', name:'Mohamed Koroma',  role:'supervisor',  initials:'MK'},
+  finance:     {pass:'fin123', name:'Fatmata Sesay',   role:'finance',     initials:'FS'},
+  procurement: {pass:'pro123', name:'Ibrahim Bangura', role:'procurement', initials:'IB'},
+  director:    {pass:'dir123', name:'Dr. Sahr Ngauja', role:'director',    initials:'SN'},
+  admin:       {pass:'admin123',name:'System Admin',   role:'admin',       initials:'SA'}
+};
+
+let state = {users:{}, requests:[]};
+let currentUser = null;
+let pendingAction = null;
+let autoRefreshTimer = null;
+let isSaving = false;
+
+// ── CLOUD SYNC ──
+async function loadFromCloud(manual=false){
+  setSyncState('syncing','Loading...');
+  setStatus('Loading data from cloud...');
+  try {
+    const res = await fetch(BIN_URL+'/latest', {headers:{'X-Master-Key':API_KEY}});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const json = await res.json();
+    const data = json.record;
+    if(data && data.users && data.requests){
+      state = data;
+    } else {
+      await initCloud();
+    }
+    setSyncState('saved','Synced');
+    updateLastSync();
+    if(manual) showToast('Data refreshed from cloud','success');
+    return true;
+  } catch(e){
+    setSyncState('error','Sync error');
+    if(manual) showToast('Could not reach cloud — check internet connection','error');
+    console.error('Load error:',e);
+    return false;
+  }
+}
+
+async function pushToCloud(manual=false){
+  if(isSaving) return;
+  isSaving = true;
+  setSyncState('syncing','Saving...');
+  try {
+    const res = await fetch(BIN_URL, {
+      method:'PUT',
+      headers:HEADERS,
+      body:JSON.stringify(state)
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    setSyncState('saved','Saved');
+    updateLastSync();
+    if(manual) showToast('Data pushed to cloud','success');
+  } catch(e){
+    setSyncState('error','Save failed');
+    showToast('Save failed — check internet connection','error');
+    console.error('Save error:',e);
+  } finally {
+    isSaving = false;
+  }
+}
+
+async function initCloud(){
+  const initial = {users: JSON.parse(JSON.stringify(DEFAULT_USERS)), requests: getSampleRequests()};
+  const res = await fetch(BIN_URL, {method:'PUT', headers:HEADERS, body:JSON.stringify(initial)});
+  if(!res.ok) throw new Error('Init failed');
+  state = initial;
+}
+
+function setSyncState(type, label){
+  const pill = document.getElementById('sync-pill');
+  const dot  = document.getElementById('sync-dot');
+  const lbl  = document.getElementById('sync-label');
+  pill.className = 'sync-pill '+type;
+  dot.className  = type==='syncing'?'sync-dot spin':'sync-dot';
+  lbl.textContent = label;
+}
+
+function updateLastSync(){
+  const el = document.getElementById('last-sync-label');
+  if(el) el.textContent = 'Last synced: '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+function startAutoRefresh(){
+  if(autoRefreshTimer) clearInterval(autoRefreshTimer);
+  autoRefreshTimer = setInterval(()=>{
+    if(currentUser && !isSaving) loadFromCloud().then(()=>{ renderRequests(); renderActivity(); });
+  }, 30000);
+}
+
+function stopAutoRefresh(){ if(autoRefreshTimer){ clearInterval(autoRefreshTimer); autoRefreshTimer=null; } }
+
+// ── AUTH ──
+function doLogin(){
+  const u = document.getElementById('login-user').value.trim().toLowerCase();
+  const p = document.getElementById('login-pass').value;
+  const user = state.users[u];
+  const errEl = document.getElementById('login-error');
+  if(!user || user.pass!==p){ errEl.textContent='Invalid username or password.'; return; }
+  errEl.textContent='';
+  currentUser = {...user, username:u};
+  document.getElementById('tb-avatar').textContent    = user.initials;
+  document.getElementById('tb-name').textContent      = user.name;
+  document.getElementById('tb-role-txt').textContent  = ROLE_LABEL[user.role]||user.role;
+  const badge = document.getElementById('tb-role-badge');
+  badge.textContent  = ROLE_LABEL[user.role]||user.role;
+  badge.className    = 'role-badge '+(ROLE_BADGE[user.role]||'rb-requester');
+  document.getElementById('tab-new-btn').style.display   = user.role==='requester'?'':'none';
+  document.getElementById('tab-admin-btn').style.display = user.role==='admin'?'':'none';
+  document.getElementById('screen-login').style.display  = 'none';
+  document.getElementById('screen-app').style.display    = 'block';
+  updateLastSync();
+  renderRequests();
+  startAutoRefresh();
+}
+
+function doLogout(){
+  stopAutoRefresh();
+  currentUser = null;
+  document.getElementById('screen-app').style.display  = 'none';
+  document.getElementById('screen-login').style.display = 'flex';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+}
+
+// ── ROLE HELPERS ──
+function stageForRole(r){ return {supervisor:1,finance:2,procurement:3,director:4}[r]??-1; }
+function canAct(req){ if(!currentUser||currentUser.role==='requester'||currentUser.role==='admin') return false; return req.stage===stageForRole(currentUser.role); }
+function stageClass(req){
+  if(req.stage===0) return['Draft','st-draft'];
+  if(req.stage>=6)  return['Complete','st-complete'];
+  if(req.stage===5) return['PO Issued','st-po'];
+  return[STAGES[req.stage]+' Pending','st-pending'];
+}
+
+// ── RENDER REQUESTS ──
+function renderRequests(){
+  const list=document.getElementById('req-list');
+  list.innerHTML='';
+  let visible=state.requests;
+  if(currentUser&&currentUser.role!=='requester'&&currentUser.role!=='admin'){
+    const ms=stageForRole(currentUser.role);
+    visible=state.requests.filter(r=>r.stage>=ms||r.stage>=5);
+  }
+  if(!visible.length){list.innerHTML='<div class="empty-state">No procurement requests to display.</div>';updateMetrics();return;}
+  visible.forEach(r=>{
+    const[lbl,cls]=stageClass(r);
+    const act=canAct(r);
+    const total=r.qty&&r.cost?(r.qty*r.cost).toLocaleString():'—';
+    list.innerHTML+=`<div class="req-card${act?' actionable':''}" onclick="openRequest('${r.id}')">
+      <div>
+        <div class="req-id">${r.id}</div>
+        <div class="req-name">${r.item}</div>
+        <div class="req-meta">${r.dept} &middot; Qty: ${r.qty}${r.cost?` &middot; SLL ${total}`:''} &middot; ${r.urgency}</div>
+      </div>
+      <div class="req-card-right">
+        <span class="status-tag ${cls}">${lbl}</span>
+        ${act?'<span style="font-size:11px;color:var(--blue-600);font-weight:600">Action needed</span>':''}
+        <span style="color:var(--text-muted);font-size:18px">&rsaquo;</span>
+      </div>
+    </div>`;
+  });
+  updateMetrics();
+}
+
+function updateMetrics(){
+  document.getElementById('m-total').textContent   = state.requests.length;
+  document.getElementById('m-pending').textContent = state.requests.filter(r=>r.stage>0&&r.stage<5).length;
+  document.getElementById('m-approved').textContent= state.requests.filter(r=>r.stage>=4&&r.stage<6).length;
+  document.getElementById('m-complete').textContent= state.requests.filter(r=>r.stage>=6).length;
+}
+
+// ── REQUEST DETAIL ──
+function openRequest(id){
+  const req=state.requests.find(r=>r.id===id);
+  if(!req) return;
+  document.getElementById('modal-title').textContent=req.item;
+  document.getElementById('modal-id').innerHTML=req.id+' &middot; '+req.dept;
+  const stageHtml=STAGES.map((s,i)=>{
+    let dc='',lc='';
+    if(i<req.stage){dc='done';lc='done';}else if(i===req.stage){dc='active';lc='active';}
+    return`<div class="stage-step"><div class="stage-step-inner"><div class="stage-dot ${dc}">${i<req.stage?'&#x2713;':i+1}</div><div class="stage-lbl ${lc}">${s}</div></div></div>`;
+  }).join('');
+  const total=req.qty&&req.cost?(req.qty*req.cost).toLocaleString():'—';
+  const logHtml=req.log.map(l=>`<div class="mli"><div class="mli-dot ${l.color}"></div><div><div style="font-size:13px"><span class="mli-who">${l.who}</span> (${l.role})<br>${l.action}</div><div class="mli-time">${l.time}</div></div></div>`).join('');
+  document.getElementById('modal-body').innerHTML=`
+    <div class="stage-progress">${stageHtml}</div>
+    <div class="detail-grid">
+      <div><div class="dl">Department</div><div class="dv">${req.dept}</div></div>
+      <div><div class="dl">Urgency</div><div class="dv">${req.urgency}</div></div>
+      <div><div class="dl">Quantity</div><div class="dv">${req.qty}</div></div>
+      <div><div class="dl">Unit cost (SLL)</div><div class="dv">${req.cost?req.cost.toLocaleString():'—'}</div></div>
+      <div><div class="dl">Total value (SLL)</div><div class="dv total">${total}</div></div>
+      <div><div class="dl">Required by</div><div class="dv">${req.date||'—'}</div></div>
+      ${req.supplier?`<div><div class="dl">Supplier</div><div class="dv">${req.supplier}</div></div>`:''}
+      ${req.budget?`<div><div class="dl">Budget line</div><div class="dv" style="font-family:'DM Mono',monospace;font-size:12px">${req.budget}</div></div>`:''}
+    </div>
+    <div class="jbox"><strong>Business justification</strong>${req.justification}</div>
+    ${req.notes?`<div class="jbox" style="border-left-color:var(--gray-200)"><strong>Notes</strong>${req.notes}</div>`:''}
+    <div class="log-title">Approval trail</div>${logHtml}
+  `;
+  const acts=document.getElementById('modal-actions');
+  acts.innerHTML='';
+  if(canAct(req)){
+    acts.innerHTML+=`<button class="btn-approve" onclick="triggerAction('${id}','approve')">Approve</button>`;
+    acts.innerHTML+=`<button class="btn-reject" onclick="triggerAction('${id}','reject')">Reject</button>`;
+    if(req.stage===3) acts.innerHTML+=`<button class="btn-po" onclick="triggerAction('${id}','po')">Issue PO</button>`;
+    if(req.stage===4) acts.innerHTML+=`<button class="btn-po" onclick="triggerAction('${id}','complete')">Mark complete</button>`;
+  } else if(req.stage>=6){
+    acts.innerHTML='<span style="font-size:13px;color:var(--teal-600);font-weight:500">&#x2713; Process complete</span>';
+  } else {
+    acts.innerHTML=`<span style="font-size:13px;color:var(--text-muted)">Awaiting: <strong>${STAGES[req.stage]}</strong></span>`;
+  }
+  acts.innerHTML+=`<button class="btn-close-modal" onclick="closeModal()">Close</button>`;
+  document.getElementById('req-modal').classList.add('open');
+}
+
+function closeModal(){ document.getElementById('req-modal').classList.remove('open'); }
+function handleOverlay(e,id){ if(e.target.id===id) closeModal(); }
+
+function triggerAction(id,type){
+  pendingAction={id,type};
+  const titles={approve:'Approve request',reject:'Reject request',po:'Issue purchase order',complete:'Mark as complete'};
+  document.getElementById('cmt-title').textContent=titles[type];
+  document.getElementById('cmt-text').value='';
+  const btn=document.getElementById('cmt-confirm');
+  btn.textContent=type==='reject'?'Reject':type==='po'?'Issue PO':type==='complete'?'Complete':'Approve';
+  btn.className=type==='reject'?'btn-reject':type==='po'||type==='complete'?'btn-po':'btn-approve';
+  document.getElementById('cmt-modal').classList.add('open');
+}
+function closeCmt(){ document.getElementById('cmt-modal').classList.remove('open'); pendingAction=null; }
+
+async function confirmAction(){
+  if(!pendingAction) return;
+  const{id,type}=pendingAction;
+  const req=state.requests.find(r=>r.id===id);
+  if(!req) return;
+  const comment=document.getElementById('cmt-text').value.trim();
+  const now=new Date().toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  let action='';
+  if(type==='approve'){
+    req.stage=Math.min(req.stage+1,6);
+    const sm={1:'Supervisor approved',2:'Finance confirmed',3:'Procurement verified',4:'Director approved',5:'PO issued',6:'Complete'};
+    action=(comment?comment+' — ':'')+(sm[req.stage]||'Approved');
+    showToast('Request approved and forwarded','success');
+  } else if(type==='reject'){
+    action='Rejected'+(comment?' — '+comment:'');
+    req.stage=0;
+    showToast('Request rejected and returned to draft','error');
+  } else if(type==='po'){
+    req.stage=5;
+    action='Purchase order issued'+(comment?' — '+comment:'');
+    showToast('Purchase order issued','success');
+  } else if(type==='complete'){
+    req.stage=6;
+    action='Marked complete'+(comment?' — '+comment:'');
+    showToast('Procurement complete','success');
+  }
+  req.log.push({who:currentUser.name,role:ROLE_LABEL[currentUser.role]||currentUser.role,action,time:now,color:type==='reject'?'red':type==='po'||type==='complete'?'blue':'green'});
+  closeCmt();
+  closeModal();
+  renderRequests();
+  renderActivity();
+  pendingAction=null;
+  await pushToCloud();
+}
+
+// ── SUBMIT ──
+async function submitRequest(){
+  const item=document.getElementById('f-item').value.trim();
+  const dept=document.getElementById('f-dept').value;
+  const qty=parseInt(document.getElementById('f-qty').value)||0;
+  const justification=document.getElementById('f-justification').value.trim();
+  const err=document.getElementById('form-error');
+  if(!item||!dept||!qty||!justification){err.textContent='Please complete all required fields.';return;}
+  err.textContent='';
+  const btn=document.getElementById('submit-btn');
+  btn.disabled=true;btn.textContent='Submitting...';
+  const num=state.requests.length+1;
+  const id='PR-'+(num<10?'00':num<100?'0':'')+num;
+  const now=new Date().toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  state.requests.unshift({
+    id,item,dept,qty,
+    cost:parseInt(document.getElementById('f-cost').value)||0,
+    urgency:document.getElementById('f-urgency').value,
+    date:document.getElementById('f-date').value,
+    justification,
+    supplier:document.getElementById('f-supplier').value.trim(),
+    budget:document.getElementById('f-budget').value.trim(),
+    notes:document.getElementById('f-notes').value.trim(),
+    stage:1,
+    log:[{who:currentUser.name,role:ROLE_LABEL[currentUser.role],action:'Submitted request',time:now,color:'blue'}]
+  });
+  await pushToCloud();
+  clearForm();
+  btn.disabled=false;btn.textContent='Submit request';
+  showToast('Request submitted successfully','success');
+  switchTab('requests',document.querySelector('.tab-btn'));
+}
+
+function clearForm(){
+  ['f-item','f-dept','f-qty','f-cost','f-justification','f-supplier','f-budget','f-notes','f-date'].forEach(id=>{
+    const el=document.getElementById(id);if(el) el.value='';
+  });
+  document.getElementById('form-error').textContent='';
+}
+
+// ── ACTIVITY ──
+function renderActivity(){
+  const all=state.requests.flatMap(r=>r.log.map(l=>({...l,reqId:r.id})));
+  document.getElementById('activity-list').innerHTML=all.reverse().map(l=>`
+    <div class="act-item">
+      <div class="act-dot ${l.color}"></div>
+      <div>
+        <div style="font-size:13px"><span class="act-req">${l.reqId}</span>${l.action} &mdash; <strong>${l.who}</strong> <span style="color:var(--text-muted)">(${l.role})</span></div>
+        <div class="act-time">${l.time}</div>
+      </div>
+    </div>
+  `).join('')||'<div class="empty-state">No activity yet.</div>';
+}
+
+// ── ADMIN ──
+function renderUserTable(){
+  document.getElementById('user-tbody').innerHTML=Object.entries(state.users).map(([u,d])=>`
+    <tr>
+      <td><code style="font-family:'DM Mono',monospace;font-size:12px">${u}</code></td>
+      <td>${d.name}</td>
+      <td><span class="role-badge ${ROLE_BADGE[d.role]||'rb-requester'}" style="display:inline-block">${ROLE_LABEL[d.role]||d.role}</span></td>
+      <td>${u==='admin'?'':'<button class="btn-del" onclick="deleteUser(\''+u+'\')">Remove</button>'}</td>
+    </tr>
+  `).join('');
+}
+
+async function addUser(){
+  const uname=document.getElementById('nu-user').value.trim().toLowerCase();
+  const pass=document.getElementById('nu-pass').value.trim();
+  const name=document.getElementById('nu-name').value.trim();
+  const role=document.getElementById('nu-role').value;
+  const err=document.getElementById('admin-error');
+  if(!uname||!pass||!name){err.textContent='All fields required.';return;}
+  if(state.users[uname]){err.textContent='Username already exists.';return;}
+  if(!/^[a-z0-9_]+$/.test(uname)){err.textContent='Username: lowercase letters, numbers, underscores only.';return;}
+  err.textContent='';
+  const parts=name.split(' ').filter(Boolean);
+  const initials=((parts[0]?.[0]||'')+(parts[1]?.[0]||parts[0]?.[1]||'')).toUpperCase();
+  state.users[uname]={pass,name,role,initials};
+  await pushToCloud();
+  renderUserTable();
+  ['nu-user','nu-pass','nu-name'].forEach(id=>document.getElementById(id).value='');
+  showToast(`User "${uname}" added`,'success');
+}
+
+async function deleteUser(uname){
+  if(uname===currentUser?.username){showToast('Cannot delete your own account','error');return;}
+  if(!confirm(`Remove user "${uname}"?`)) return;
+  delete state.users[uname];
+  await pushToCloud();
+  renderUserTable();
+  showToast(`User "${uname}" removed`,'warn');
+}
+
+// ── TABS ──
+function switchTab(tab,el){
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+tab).classList.add('active');
+  if(tab==='requests'){renderRequests();}
+  if(tab==='activity'){loadFromCloud().then(()=>renderActivity());}
+  if(tab==='admin'){renderUserTable();}
+}
+
+// ── TOAST ──
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+(type||'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+function setStatus(msg){ const el=document.getElementById('loading-status'); if(el) el.textContent=msg; }
+
+// ── SAMPLE DATA ──
+function getSampleRequests(){
+  return [
+    {id:'PR-001',item:'Laptop batteries (x10)',dept:'ICT',qty:10,cost:850000,urgency:'Urgent',date:'2026-05-15',justification:'Existing batteries failing; remote working capability impacted.',supplier:'TechMart SL',budget:'ICT-2026-Q2',notes:'Lenovo ThinkPad compatible.',stage:5,log:[
+      {who:'Aisha Kamara',role:'Requester',action:'Submitted request',time:'Apr 20, 09:12',color:'blue'},
+      {who:'Mohamed Koroma',role:'Supervisor',action:'Supervisor approved',time:'Apr 21, 10:30',color:'green'},
+      {who:'Fatmata Sesay',role:'Finance Officer',action:'Finance confirmed',time:'Apr 21, 14:05',color:'green'},
+      {who:'Ibrahim Bangura',role:'Procurement Officer',action:'Procurement verified',time:'Apr 22, 11:20',color:'green'},
+      {who:'Dr. Sahr Ngauja',role:'Director',action:'Director approved',time:'Apr 23, 09:00',color:'green'},
+      {who:'Ibrahim Bangura',role:'Procurement Officer',action:'Purchase order issued to TechMart SL',time:'Apr 24, 10:00',color:'blue'}
+    ]},
+    {id:'PR-002',item:'Printer cartridges — Canon PG-245',dept:'Administration',qty:20,cost:120000,urgency:'Routine',date:'2026-05-30',justification:'Monthly replenishment of printing supplies.',supplier:'',budget:'ADM-2026-Q2',notes:'',stage:1,log:[
+      {who:'Aisha Kamara',role:'Requester',action:'Submitted request',time:'Apr 24, 14:30',color:'blue'}
+    ]},
+    {id:'PR-003',item:'Conference room chairs (x15)',dept:'Plenary',qty:15,cost:2500000,urgency:'Routine',date:'2026-06-15',justification:'Replacing damaged seating in Conference Room B.',supplier:'Freetown Furniture Ltd',budget:'PLN-2026-Q2',notes:'Upholstered ergonomic chairs.',stage:2,log:[
+      {who:'Aisha Kamara',role:'Requester',action:'Submitted request',time:'Apr 23, 08:00',color:'blue'},
+      {who:'Mohamed Koroma',role:'Supervisor',action:'Supervisor approved',time:'Apr 24, 09:15',color:'green'}
+    ]},
+    {id:'PR-004',item:'USB hubs and peripheral cables',dept:'ICT',qty:30,cost:45000,urgency:'Routine',date:'2026-05-10',justification:'Replacing damaged cables across departments.',supplier:'',budget:'ICT-2026-Q1',notes:'',stage:6,log:[
+      {who:'Aisha Kamara',role:'Requester',action:'Submitted request',time:'Apr 15, 10:00',color:'blue'},
+      {who:'Mohamed Koroma',role:'Supervisor',action:'Supervisor approved',time:'Apr 16, 09:00',color:'green'},
+      {who:'Fatmata Sesay',role:'Finance Officer',action:'Finance confirmed',time:'Apr 16, 15:00',color:'green'},
+      {who:'Ibrahim Bangura',role:'Procurement Officer',action:'Procurement verified',time:'Apr 17, 11:00',color:'green'},
+      {who:'Dr. Sahr Ngauja',role:'Director',action:'Director approved',time:'Apr 18, 09:30',color:'green'},
+      {who:'Ibrahim Bangura',role:'Procurement Officer',action:'Purchase order issued',time:'Apr 19, 10:00',color:'blue'},
+      {who:'Ibrahim Bangura',role:'Procurement Officer',action:'Goods received — process complete',time:'Apr 22, 14:00',color:'green'}
+    ]}
+  ];
+}
+
+// ── INIT ──
+window.addEventListener('load', async ()=>{
+  setStatus('Connecting to cloud storage...');
+  const ok = await loadFromCloud();
+  if(!ok){
+    setStatus('Could not reach cloud. Check your internet connection and reload.');
+    setTimeout(()=>{
+      document.getElementById('screen-loading').style.display='none';
+      document.getElementById('screen-login').style.display='flex';
+    }, 2000);
+    return;
+  }
+  setStatus('Connected ✓');
+  setTimeout(()=>{
+    document.getElementById('screen-loading').style.display='none';
+    document.getElementById('screen-login').style.display='flex';
+  }, 600);
+});
+
+document.getElementById('login-pass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>
